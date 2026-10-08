@@ -14,7 +14,7 @@ export const EditorialStory = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-amber-400">
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400">
               <Sparkles className="w-4 h-4" />
               <span>THE BRAND PHILOSOPHY</span>
             </div>
@@ -25,7 +25,7 @@ export const EditorialStory = () => {
             </h2>
 
             <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-normal">
-              <strong className="text-white font-semibold">QISSA</strong> was born from a desire to celebrate narrative in motion. We believe modern clothing shouldn't be mass-produced in cold warehouses. Instead, each drop is crafted in limited small artisan batches—from handloom Chanderi silks to 450 GSM heavyweight French terry street fits.
+              <strong className="text-white font-bold">QISSA LABEL</strong> was born from a desire to celebrate narrative in motion. We believe modern clothing shouldn't be mass-produced in cold warehouses. Instead, each drop is crafted in limited small artisan batches—from handloom Chanderi silks to 450 GSM heavyweight French terry streetwear.
             </p>
 
             <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-normal">
@@ -37,7 +37,7 @@ export const EditorialStory = () => {
                 href={settings.instagramUrl || "https://www.instagram.com/qissalabel/"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
               >
                 <Instagram className="w-4 h-4 text-pink-400" />
                 <span>Follow @qissalabel</span>
@@ -46,7 +46,7 @@ export const EditorialStory = () => {
 
               <button
                 onClick={() => navigateTo('stories')}
-                className="px-6 py-3.5 rounded-full bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-colors"
+                className="px-6 py-3.5 rounded-full bg-white text-black font-black text-xs uppercase tracking-wider hover:bg-zinc-200 transition-colors cursor-pointer"
               >
                 Read The Journal
               </button>
@@ -65,15 +65,15 @@ export const EditorialStory = () => {
                 />
               </div>
               <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">01. ARTISAN WEAVE</span>
-                <p className="text-xs text-zinc-300">Shuttle-loomed natural fibers that breathe with the skin.</p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">01. ARTISANAL SHUTTLE LOOMS</span>
+                <p className="text-xs text-zinc-300">Century-old loom houses crafting pure breathable silks.</p>
               </div>
             </div>
 
             <div className="space-y-4 pt-8">
               <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1">02. WHATSAPP CONCIERGE</span>
-                <p className="text-xs text-zinc-300">Direct ordering at +91 95459 83060 with tailored size advice.</p>
+                <p className="text-xs text-zinc-300">Direct ordering at +91 95459 83060 with tailored custom sizing.</p>
               </div>
               <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-900 shadow-2xl">
                 <img

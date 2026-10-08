@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { X, Plus, Trash2, Image, Sparkles, Check, Link } from 'lucide-react';
+import { X, Plus, Trash2, Image, Sparkles, Check, Link, AlertCircle } from 'lucide-react';
 
 export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => {
-  const { addProduct, updateProduct, settings } = useStore();
+  const { addProduct, updateProduct, settings, showToast } = useStore();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -25,27 +25,28 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
     sizes: ['S', 'M', 'L', 'XL'],
     colors: [
       { name: 'Onyx Black', hex: '#111111' },
-      { name: 'Emerald', hex: '#0B4F3A' }
+      { name: 'Royal Emerald', hex: '#0B4F3A' }
     ]
   });
 
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newColorName, setNewColorName] = useState('');
-  const [newColorHex, setNewColorHex] = useState('#000000');
+  const [newColorHex, setNewColorHex] = useState('#111111');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (editingProduct) {
       setFormData({
         ...editingProduct,
-        images: editingProduct.images || [],
-        sizes: editingProduct.sizes || [],
-        colors: editingProduct.colors || []
+        images: editingProduct.images && editingProduct.images.length > 0 ? editingProduct.images : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80'],
+        sizes: editingProduct.sizes || ['S', 'M', 'L'],
+        colors: editingProduct.colors || [{ name: 'Default', hex: '#111111' }]
       });
     } else {
       setFormData({
         name: '',
-        sku: 'QIS-' + Math.floor(100 + Math.random() * 900),
-        subtitle: 'Festive & Luxury Apparel',
+        sku: 'QL-' + Math.floor(100 + Math.random() * 900),
+        subtitle: "Women's Luxury Festive Drop",
         category: 'Co-ord Sets',
         gender: 'Women',
         tag: 'NEW DROP',
@@ -55,31 +56,33 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
         isHero: false,
         description: 'Handcrafted luxury piece cut with contemporary lines.',
         story: 'Woven using traditional techniques with modern minimalism.',
-        fabric: 'Handloom Cotton-Silk Blend',
+        fabric: 'Pure Handloom Chanderi Cotton-Silk Blend',
         care: 'Dry clean only.',
         fit: 'True to size tailored fit.',
         images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80'],
-        sizes: ['S', 'M', 'L', 'XL'],
+        sizes: ['XS', 'S', 'M', 'L', 'XL'],
         colors: [
-          { name: 'Onyx Black', hex: '#111111' }
+          { name: 'Onyx Black', hex: '#111111' },
+          { name: 'Royal Emerald', hex: '#0B4F3A' }
         ]
       });
     }
+    setErrorMessage('');
   }, [editingProduct, isOpen]);
 
   if (!isOpen) return null;
 
   const standardSizes = ["XS", "S", "M", "L", "XL", "XXL", "38 (S)", "40 (M)", "42 (L)", "44 (XL)"];
 
-  // Quick preset fashion photo library
+  // Quick preset fashion photo library curated for Qissa Label
   const curatedFashionImages = [
-    { label: "Emerald Silk", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80" },
-    { label: "Ruby Velvet", url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=80" },
-    { label: "Festive Saree", url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1200&q=80" },
-    { label: "Black Street Hoodie", url: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80" },
-    { label: "Raw Linen Co-ord", url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80" },
-    { label: "Men's Bandhgala", url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80" },
-    { label: "Selvedge Denim", url: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80" }
+    { label: "Emerald Silk Co-ord", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Ruby Velvet Ensemble", url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Pre-Draped Festive Saree", url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1200&q=80" },
+    { label: "450 GSM Black Hoodie", url: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Pure Linen Summer Co-ord", url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Men's Silk Bandhgala", url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80" },
+    { label: "13.5oz Selvedge Denim", url: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80" }
   ];
 
   const handleSizeToggle = (size) => {
@@ -104,6 +107,10 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
   };
 
   const handleRemoveImage = (idx) => {
+    if (formData.images.length === 1) {
+      showToast('At least one primary image is required', 'error');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== idx)
@@ -117,7 +124,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
         colors: [...prev.colors, { name: newColorName.trim(), hex: newColorHex }]
       }));
       setNewColorName('');
-      setNewColorHex('#000000');
+      setNewColorHex('#111111');
     }
   };
 
@@ -131,11 +138,15 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert('Product name is required');
+      setErrorMessage('Product title is required.');
+      return;
+    }
+    if (!formData.price || formData.price <= 0) {
+      setErrorMessage('Please provide a valid sale price.');
       return;
     }
     if (formData.images.length === 0) {
-      alert('Please add at least one image');
+      setErrorMessage('Please add at least one product photography image.');
       return;
     }
 
@@ -154,8 +165,8 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
         {/* Header */}
         <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-              QISSA ATELIER ADMIN
+            <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
+              QISSA LABEL ATELIER ADMIN
             </span>
             <h2 className="font-heading text-2xl sm:text-3xl font-black uppercase tracking-tight text-black">
               {editingProduct ? `Edit: ${editingProduct.name}` : 'Add New Clothing Drop'}
@@ -163,11 +174,19 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-200 rounded-full text-zinc-600 hover:text-black transition-colors"
+            className="p-2 hover:bg-zinc-200 rounded-full text-zinc-600 hover:text-black transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Error notification banner */}
+        {errorMessage && (
+          <div className="mx-6 mt-4 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
@@ -175,13 +194,13 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           {/* Row 1: Name, SKU, Tag */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Product Title *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Qissa 'Noor' Chanderi Silk Co-ord Set"
+                placeholder="e.g. Qissa Label 'Noor' Chanderi Silk Co-ord Set"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black font-semibold"
@@ -189,7 +208,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 SKU / Identifier
               </label>
               <input
@@ -204,7 +223,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           {/* Row 2: Subtitle, Category, Gender, Tag */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Subtitle
               </label>
               <input
@@ -217,7 +236,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Category
               </label>
               <select
@@ -236,7 +255,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Gender Target
               </label>
               <select
@@ -251,7 +270,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Badge Tag
               </label>
               <select
@@ -272,7 +291,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           {/* Row 3: Pricing & Stock */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Sale Price ({settings.currencySymbol}) *
               </label>
               <input
@@ -286,7 +305,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Original MRP ({settings.currencySymbol})
               </label>
               <input
@@ -304,9 +323,9 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
                   type="checkbox"
                   checked={formData.inStock}
                   onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                  className="w-4 h-4 accent-black rounded"
+                  className="w-4 h-4 accent-black rounded cursor-pointer"
                 />
-                <span className="text-xs font-bold uppercase text-zinc-800">In Stock</span>
+                <span className="text-xs font-black uppercase text-zinc-800">In Stock</span>
               </label>
             </div>
 
@@ -316,9 +335,9 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
                   type="checkbox"
                   checked={formData.isHero}
                   onChange={(e) => setFormData({ ...formData, isHero: e.target.checked })}
-                  className="w-4 h-4 accent-black rounded"
+                  className="w-4 h-4 accent-black rounded cursor-pointer"
                 />
-                <span className="text-xs font-bold uppercase text-zinc-800">Hero Drop</span>
+                <span className="text-xs font-black uppercase text-zinc-800">Hero Drop</span>
               </label>
             </div>
           </div>
@@ -326,7 +345,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           {/* Row 4: Descriptions & Story */}
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                 Product Description
               </label>
               <textarea
@@ -340,7 +359,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                   Fabric & Material
                 </label>
                 <input
@@ -352,7 +371,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                   Care Instructions
                 </label>
                 <input
@@ -364,7 +383,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
                   Fit Guidance
                 </label>
                 <input
@@ -379,7 +398,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
 
           {/* Sizes Selection */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-2">
+            <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-2">
               Available Sizes (Click to toggle)
             </label>
             <div className="flex flex-wrap gap-2">
@@ -390,7 +409,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
                     key={size}
                     type="button"
                     onClick={() => handleSizeToggle(size)}
-                    className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all ${
+                    className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-black text-white border-black shadow'
                         : 'bg-zinc-100 text-zinc-600 border-transparent hover:border-zinc-300'
@@ -405,8 +424,8 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
 
           {/* Colors */}
           <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-              Color Variants
+            <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
+              Color Variants & Swatches
             </label>
             
             {/* List of active colors */}
@@ -415,7 +434,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
                 <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-zinc-200 shadow-sm text-xs font-semibold">
                   <span className="w-3.5 h-3.5 rounded-full border border-zinc-300" style={{ backgroundColor: c.hex }} />
                   <span>{c.name}</span>
-                  <button type="button" onClick={() => handleRemoveColor(idx)} className="text-zinc-400 hover:text-red-500">
+                  <button type="button" onClick={() => handleRemoveColor(idx)} className="text-zinc-400 hover:text-red-500 cursor-pointer">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
@@ -440,7 +459,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
               <button
                 type="button"
                 onClick={handleAddColor}
-                className="px-4 py-2 bg-black text-white text-xs font-bold uppercase rounded-xl hover:bg-zinc-800"
+                className="px-4 py-2 bg-black text-white text-xs font-bold uppercase rounded-xl hover:bg-zinc-800 cursor-pointer"
               >
                 Add Color
               </button>
@@ -450,28 +469,28 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           {/* Images Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
-                Product Photography ({formData.images.length} added)
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
+                Product Photography ({formData.images.length} photos)
               </label>
-              <span className="text-[11px] text-zinc-500">Supports Instagram CDN, Unsplash, or direct image URLs</span>
+              <span className="text-[11px] text-zinc-500">Supports direct URLs from Instagram CDN, Unsplash, or Shopify</span>
             </div>
 
             {/* Image Preview Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {formData.images.map((img, idx) => (
-                <div key={idx} className="relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-100 group border border-zinc-200">
+                <div key={idx} className="relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-100 group border border-zinc-200 shadow-sm">
                   <img src={img} alt="" className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(idx)}
-                    className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove image"
+                    className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    title="Remove photo"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                   {idx === 0 && (
                     <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded">
-                      Primary
+                      Cover
                     </span>
                   )}
                 </div>
@@ -490,7 +509,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
               <button
                 type="button"
                 onClick={() => handleAddImage()}
-                className="px-5 py-2 bg-zinc-900 text-white text-xs font-bold uppercase rounded-xl hover:bg-black"
+                className="px-5 py-2 bg-zinc-900 text-white text-xs font-bold uppercase rounded-xl hover:bg-black cursor-pointer"
               >
                 Add URL
               </button>
@@ -507,7 +526,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
                     key={idx}
                     type="button"
                     onClick={() => handleAddImage(preset.url)}
-                    className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-xs font-medium text-zinc-700 flex items-center gap-1"
+                    className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-xs font-semibold text-zinc-700 flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" /> {preset.label}
                   </button>
@@ -524,15 +543,15 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 border border-zinc-300 text-zinc-700 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-zinc-100"
+            className="px-6 py-3 border border-zinc-300 text-zinc-700 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-zinc-100 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-black text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-zinc-800 shadow-lg"
+            className="px-8 py-3 bg-black text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-zinc-800 shadow-lg cursor-pointer"
           >
-            {editingProduct ? 'Save Changes' : 'Publish to Showcase'}
+            {editingProduct ? 'Save & Update Fit' : 'Publish to Showcase'}
           </button>
         </div>
 

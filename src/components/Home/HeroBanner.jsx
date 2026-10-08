@@ -6,10 +6,10 @@ export const HeroBanner = () => {
   const { settings, navigateTo, setCategoryFilter } = useStore();
 
   const featuredDrops = [
-    { label: "Co-ord Sets", category: "Co-ord Sets" },
-    { label: "Heavy Streetwear", category: "Streetwear & Hoodies" },
+    { label: "Silk Co-ords", category: "Co-ord Sets" },
+    { label: "450 GSM Streetwear", category: "Streetwear & Hoodies" },
     { label: "Festive Anarkalis", category: "Dresses & Anarkalis" },
-    { label: "Men's Couture", category: "Men's Couture" },
+    { label: "Men's Bandhgalas", category: "Men's Couture" },
     { label: "Pre-Draped Sarees", category: "Sarees & Ensembles" }
   ];
 
@@ -24,7 +24,7 @@ export const HeroBanner = () => {
           }}
         >
           {/* Nike-Style Deep Gradient Scrim */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/30 md:bg-gradient-to-r md:from-black/80 md:via-black/40 md:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/30 md:bg-gradient-to-r md:from-black/85 md:via-black/45 md:to-transparent" />
         </div>
 
         {/* Hero Content Container */}
@@ -32,21 +32,21 @@ export const HeroBanner = () => {
           <div className="max-w-2xl space-y-6">
             
             {/* Top Pill */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-black tracking-widest uppercase">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>THE FESTIVE & STREETWEAR CAPSULE</span>
+              <span>QISSA LABEL ATELIER • DROP 04 LIVE</span>
             </div>
 
             {/* Nike Bold Massive Typography */}
             <div className="space-y-1">
               <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight font-heading leading-[0.9] text-white">
                 WEAR YOUR <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-amber-200">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-100 to-amber-200">
                   NARRATIVE.
                 </span>
               </h1>
-              <p className="text-base sm:text-lg text-zinc-300 font-normal max-w-lg pt-2 leading-relaxed">
-                Handcrafted luxury co-ords,selvedge denim, pure Chanderi silks and heavyweight streetwear. Order directly on WhatsApp with our personal stylist concierge.
+              <p className="text-sm sm:text-base text-zinc-300 font-medium max-w-lg pt-2 leading-relaxed">
+                Handcrafted pure Chanderi silk co-ords, micro-velvet royal ensembles, and 450 GSM heavyweight street fits. Order directly on WhatsApp with our personal stylist concierge.
               </p>
             </div>
 
@@ -57,17 +57,17 @@ export const HeroBanner = () => {
                   setCategoryFilter('all');
                   navigateTo('catalog');
                 }}
-                className="px-8 py-4 bg-white text-black font-extrabold text-sm uppercase tracking-wider rounded-full hover:bg-zinc-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg flex items-center gap-2"
+                className="px-8 py-4 bg-white text-black font-black text-xs sm:text-sm uppercase tracking-wider rounded-full hover:bg-zinc-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg flex items-center gap-2 cursor-pointer"
               >
                 <span>Shop The Collection</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <a
-                href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Salam / Hi Qissa Label! 🧵 I'm browsing your latest drop and would love personalized styling recommendations.")}`}
+                href={`https://wa.me/${(settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Salam / Hi Qissa Label! 🧵 I'm browsing your latest showcase drop and would love personalized styling recommendations.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-4 bg-[#25D366] hover:bg-[#20b858] text-white font-extrabold text-sm uppercase tracking-wider rounded-full transition-all transform hover:-translate-y-0.5 shadow-lg flex items-center gap-2"
+                className="px-6 py-4 bg-[#25D366] hover:bg-[#20b858] text-white font-black text-xs sm:text-sm uppercase tracking-wider rounded-full transition-all transform hover:-translate-y-0.5 shadow-lg flex items-center gap-2 cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
                 <span>Order on WhatsApp</span>
@@ -76,8 +76,8 @@ export const HeroBanner = () => {
 
             {/* Quick Filter Tag Bar */}
             <div className="pt-6 border-t border-white/15 hidden sm:block">
-              <div className="text-xs uppercase tracking-widest text-zinc-400 font-bold mb-2.5">
-                Quick Explore
+              <div className="text-[11px] uppercase tracking-widest text-zinc-400 font-extrabold mb-2.5">
+                Quick Explore Drops
               </div>
               <div className="flex flex-wrap gap-2">
                 {featuredDrops.map((drop, idx) => (
@@ -87,7 +87,7 @@ export const HeroBanner = () => {
                       setCategoryFilter(drop.category);
                       navigateTo('catalog');
                     }}
-                    className="px-3.5 py-1.5 rounded-full bg-black/40 hover:bg-white hover:text-black border border-white/20 text-xs font-semibold text-zinc-200 transition-colors backdrop-blur-sm"
+                    className="px-3.5 py-1.5 rounded-full bg-black/40 hover:bg-white hover:text-black border border-white/20 text-xs font-bold text-zinc-200 transition-colors backdrop-blur-sm cursor-pointer"
                   >
                     {drop.label}
                   </button>

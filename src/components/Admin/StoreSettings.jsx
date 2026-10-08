@@ -19,15 +19,15 @@ export const StoreSettings = () => {
   };
 
   const handleReset = () => {
-    if (window.confirm('Reset all store settings and WhatsApp numbers to factory default?')) {
+    if (window.confirm('Reset all store settings and WhatsApp numbers to Qissa Label default?')) {
       resetToDefaults();
       setForm({ ...settings });
     }
   };
 
   // Test WhatsApp message link
-  const testPhone = (form.whatsappNumber || '').replace(/[^0-9]/g, '');
-  const sampleTestUrl = `https://wa.me/${testPhone}?text=${encodeURIComponent("Salam / Hi Qissa! 🧵 This is a test order message to verify my WhatsApp business integration.")}`;
+  const testPhone = (form.whatsappNumber || '919545983060').replace(/[^0-9]/g, '');
+  const sampleTestUrl = `https://wa.me/${testPhone}?text=${encodeURIComponent("Salam / Hi Qissa Label! 🧵 This is a test order message to verify my WhatsApp business order integration.")}`;
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -41,7 +41,7 @@ export const StoreSettings = () => {
             </div>
             <div>
               <h3 className="font-heading text-xl font-black uppercase tracking-wide text-black">
-                WhatsApp Business Integration
+                WhatsApp Business Order Integration
               </h3>
               <p className="text-xs text-zinc-500">
                 Incoming orders from the website showcase will be sent directly to this WhatsApp phone number.
@@ -51,7 +51,7 @@ export const StoreSettings = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 WhatsApp Phone (With Country Code, No + or spaces) *
               </label>
               <input
@@ -69,7 +69,7 @@ export const StoreSettings = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Display Phone (Public View on Navbar & Footer)
               </label>
               <input
@@ -95,7 +95,7 @@ export const StoreSettings = () => {
               rel="noopener noreferrer"
               className="px-4 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow"
             >
-              <span>Test WhatsApp</span>
+              <span>Test WhatsApp Link</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -103,7 +103,7 @@ export const StoreSettings = () => {
           {/* WhatsApp Message Template */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
                 WhatsApp Order Message Template
               </label>
               <span className="text-[11px] text-zinc-400">Supported variables: {'{product_name}'}, {'{sku}'}, {'{size}'}, {'{color}'}, {'{currency}'}, {'{price}'}, {'{quantity}'}, {'{url}'}</span>
@@ -136,7 +136,7 @@ export const StoreSettings = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Brand Name
               </label>
               <input
@@ -149,7 +149,7 @@ export const StoreSettings = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Brand Tagline
               </label>
               <input
@@ -162,7 +162,7 @@ export const StoreSettings = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Instagram Profile URL
               </label>
               <input
@@ -176,7 +176,7 @@ export const StoreSettings = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Concierge Support Email
               </label>
               <input
@@ -191,7 +191,7 @@ export const StoreSettings = () => {
 
           {/* Announcement Bar text */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+            <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
               Top Announcement Ticker Text
             </label>
             <input
@@ -206,7 +206,7 @@ export const StoreSettings = () => {
           {/* Currency Settings */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Currency Symbol
               </label>
               <input
@@ -219,7 +219,7 @@ export const StoreSettings = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Currency Code (ISO)
               </label>
               <input
@@ -238,10 +238,10 @@ export const StoreSettings = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="px-5 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center gap-1.5"
+            className="px-5 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Reset to Factory Defaults</span>
+            <span>Reset to Qissa Label Defaults</span>
           </button>
 
           <button

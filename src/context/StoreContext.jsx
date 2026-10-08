@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { INITIAL_PRODUCTS, INITIAL_CATEGORIES, BRAND_SETTINGS } from '../data/initialProducts';
 
 const StoreContext = createContext(null);
@@ -7,8 +7,11 @@ export const StoreProvider = ({ children }) => {
   // Load products from localStorage or fallback to INITIAL_PRODUCTS
   const [products, setProducts] = useState(() => {
     try {
-      const saved = localStorage.getItem('qissa_products');
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem('qissalabel_products');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {
       console.error('Error loading products from storage', e);
     }
@@ -18,7 +21,7 @@ export const StoreProvider = ({ children }) => {
   // Load settings
   const [settings, setSettings] = useState(() => {
     try {
-      const saved = localStorage.getItem('qissa_settings');
+      const saved = localStorage.getItem('qissalabel_settings');
       if (saved) return { ...BRAND_SETTINGS, ...JSON.parse(saved) };
     } catch (e) {
       console.error('Error loading settings from storage', e);
@@ -29,7 +32,7 @@ export const StoreProvider = ({ children }) => {
   // Showcase Bag (Multi-item order)
   const [bag, setBag] = useState(() => {
     try {
-      const saved = localStorage.getItem('qissa_bag');
+      const saved = localStorage.getItem('qissalabel_bag');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error('Error loading bag from storage', e);
@@ -40,7 +43,7 @@ export const StoreProvider = ({ children }) => {
   // Wishlist
   const [wishlist, setWishlist] = useState(() => {
     try {
-      const saved = localStorage.getItem('qissa_wishlist');
+      const saved = localStorage.getItem('qissalabel_wishlist');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error('Error loading wishlist from storage', e);
@@ -51,7 +54,7 @@ export const StoreProvider = ({ children }) => {
   // Inquiries / Leads log
   const [inquiries, setInquiries] = useState(() => {
     try {
-      const saved = localStorage.getItem('qissa_inquiries');
+      const saved = localStorage.getItem('qissalabel_inquiries');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error('Error loading inquiries from storage', e);
@@ -76,51 +79,51 @@ export const StoreProvider = ({ children }) => {
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('qissa_products', JSON.stringify(products));
+    localStorage.setItem('qissalabel_products', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem('qissa_settings', JSON.stringify(settings));
+    localStorage.setItem('qissalabel_settings', JSON.stringify(settings));
   }, [settings]);
 
   useEffect(() => {
-    localStorage.setItem('qissa_bag', JSON.stringify(bag));
+    localStorage.setItem('qissalabel_bag', JSON.stringify(bag));
   }, [bag]);
 
   useEffect(() => {
-    localStorage.setItem('qissa_wishlist', JSON.stringify(wishlist));
+    localStorage.setItem('qissalabel_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
   useEffect(() => {
-    localStorage.setItem('qissa_inquiries', JSON.stringify(inquiries));
+    localStorage.setItem('qissalabel_inquiries', JSON.stringify(inquiries));
   }, [inquiries]);
 
   // Toast notification helper
-  const showToast = (message, type = 'info') => {
+  const showToast = useCallback((message, type = 'info') => {
     const id = Date.now() + Math.random();
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3800);
-  };
+  }, []);
 
   // Log an inquiry when user clicks WhatsApp order
-  const logInquiry = (details) => {
+  const logInquiry = useCallback((details) => {
     const newEntry = {
       id: 'INQ-' + Date.now(),
       timestamp: new Date().toISOString(),
       ...details
     };
     setInquiries(prev => [newEntry, ...prev]);
-  };
+  }, []);
 
   // Generate WhatsApp Order Link for a single product
-  const getWhatsAppUrl = (product, { size, color, quantity = 1, customNote = '' } = {}) => {
+  const getWhatsAppUrl = useCallback((product, { size, color, quantity = 1, customNote = '' } = {}) => {
     const selectedSize = size || (product.sizes && product.sizes[0]) || 'Standard';
     const selectedColor = typeof color === 'object' ? color.name : (color || (product.colors && product.colors[0]?.name) || 'Default');
-    const cleanPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
+    const cleanPhone = (settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '');
 
-    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://qissa.shop';
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://qissalabel.shop';
     const productUrl = `${currentOrigin}/#product/${product.id}`;
 
     let message = settings.messageTemplate || BRAND_SETTINGS.messageTemplate;
@@ -129,13 +132,13 @@ export const StoreProvider = ({ children }) => {
       .replace('{sku}', product.sku || product.id)
       .replace('{size}', selectedSize)
       .replace('{color}', selectedColor)
-      .replace('{currency}', settings.currencySymbol)
-      .replace('{price}', product.price.toLocaleString())
+      .replace('{currency}', settings.currencySymbol || '₹')
+      .replace('{price}', (product.price || 0).toLocaleString())
       .replace('{quantity}', quantity)
       .replace('{url}', productUrl);
 
     if (customNote) {
-      message += `\n\n📝 *Customer Note:* ${customNote}`;
+      message += `\n\n📝 *Customer Customization / Delivery Note:* ${customNote}`;
     }
 
     logInquiry({
@@ -152,34 +155,34 @@ export const StoreProvider = ({ children }) => {
 
     const encodedText = encodeURIComponent(message);
     return `https://wa.me/${cleanPhone}?text=${encodedText}`;
-  };
+  }, [settings, logInquiry]);
 
   // Generate WhatsApp Order Link for full Bag
-  const getBagWhatsAppUrl = (customNote = '') => {
+  const getBagWhatsAppUrl = useCallback((customNote = '') => {
     if (bag.length === 0) return null;
-    const cleanPhone = settings.whatsappNumber.replace(/[^0-9]/g, '');
+    const cleanPhone = (settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '');
     const totalAmount = bag.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://qissa.shop';
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://qissalabel.shop';
 
-    let message = `Salam / Hi Qissa! 🧵\n\nI'd like to place an order for the following items from your showcase bag:\n\n`;
+    let message = `Salam / Hi Qissa Label! 🧵✨\n\nI would like to place an order for the following showcase pieces:\n\n`;
 
     bag.forEach((item, index) => {
       message += `${index + 1}. *${item.name}*\n`;
       message += `   • SKU: ${item.sku || 'N/A'}\n`;
       message += `   • Size: ${item.size} | Color: ${item.color}\n`;
-      message += `   • Qty: ${item.quantity} × ${settings.currencySymbol}${item.price.toLocaleString()} = ${settings.currencySymbol}${(item.price * item.quantity).toLocaleString()}\n\n`;
+      message += `   • Qty: ${item.quantity} × ${settings.currencySymbol || '₹'}${item.price.toLocaleString()} = ${settings.currencySymbol || '₹'}${(item.price * item.quantity).toLocaleString()}\n\n`;
     });
 
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `💰 *Total Estimated Amount:* ${settings.currencySymbol}${totalAmount.toLocaleString()}\n`;
-    message += `📦 *Total Items:* ${bag.reduce((c, i) => c + i.quantity, 0)}\n\n`;
-    message += `🔗 *View Catalog:* ${currentOrigin}\n\n`;
+    message += `💰 *Estimated Total:* ${settings.currencySymbol || '₹'}${totalAmount.toLocaleString()}\n`;
+    message += `📦 *Total Garments:* ${bag.reduce((c, i) => c + i.quantity, 0)}\n\n`;
+    message += `🔗 *Catalog:* ${currentOrigin}\n\n`;
 
     if (customNote) {
-      message += `📝 *Delivery / Fit Note:* ${customNote}\n\n`;
+      message += `📝 *Order Note:* ${customNote}\n\n`;
     }
 
-    message += `Please confirm stock availability and share payment/delivery steps! ✨`;
+    message += `Please confirm availability and share payment & delivery timeline! ✨`;
 
     logInquiry({
       type: 'Multi-Item Bag Order',
@@ -190,10 +193,10 @@ export const StoreProvider = ({ children }) => {
     });
 
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-  };
+  }, [bag, settings, logInquiry]);
 
   // Bag Operations
-  const addToBag = (product, size, color, quantity = 1) => {
+  const addToBag = useCallback((product, size, color, quantity = 1) => {
     const chosenSize = size || (product.sizes && product.sizes[0]) || 'Standard';
     const chosenColor = typeof color === 'object' ? color.name : (color || (product.colors && product.colors[0]?.name) || 'Default');
     const itemKey = `${product.id}-${chosenSize}-${chosenColor}`;
@@ -218,10 +221,10 @@ export const StoreProvider = ({ children }) => {
       }];
     });
 
-    showToast(`Added "${product.name}" (${chosenSize}) to your Showcase Bag!`, 'success');
-  };
+    showToast(`Added "${product.name}" (${chosenSize}) to Showcase Bag!`, 'success');
+  }, [showToast]);
 
-  const updateBagQuantity = (key, delta) => {
+  const updateBagQuantity = useCallback((key, delta) => {
     setBag(prev => prev.map(item => {
       if (item.key === key) {
         const newQty = item.quantity + delta;
@@ -229,85 +232,107 @@ export const StoreProvider = ({ children }) => {
       }
       return item;
     }).filter(Boolean));
-  };
+  }, []);
 
-  const removeFromBag = (key) => {
+  const removeFromBag = useCallback((key) => {
     setBag(prev => prev.filter(item => item.key !== key));
     showToast('Item removed from showcase bag', 'info');
-  };
+  }, [showToast]);
 
-  const clearBag = () => {
+  const clearBag = useCallback(() => {
     setBag([]);
-  };
+  }, []);
 
   // Wishlist Operations
-  const toggleWishlist = (productId) => {
+  const toggleWishlist = useCallback((productId) => {
     setWishlist(prev => {
       const isFavorited = prev.includes(productId);
       if (isFavorited) {
-        showToast('Removed from wishlist', 'info');
+        showToast('Removed from saved wishlist', 'info');
         return prev.filter(id => id !== productId);
       } else {
-        showToast('Saved to your wishlist! ❤️', 'success');
+        showToast('Saved to your private wardrobe shortlist! ❤️', 'success');
         return [...prev, productId];
       }
     });
-  };
+  }, [showToast]);
 
-  // Product CRUD (Admin)
-  const addProduct = (productData) => {
-    const newId = 'qis-' + Date.now().toString(36);
+  // Product CRUD (Admin) - Ultra-smooth reactive updates
+  const addProduct = useCallback((productData) => {
+    const newId = 'ql-' + Date.now().toString(36);
     const newProduct = {
       ...productData,
       id: newId,
-      slug: (productData.name || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      slug: (productData.name || 'drop').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       rating: 5.0,
       reviewCount: 1,
       inStock: productData.inStock !== false
     };
     setProducts(prev => [newProduct, ...prev]);
-    showToast(`Product "${newProduct.name}" created successfully!`, 'success');
+    showToast(`"${newProduct.name}" is now live on Qissa Label showcase!`, 'success');
     return newProduct;
-  };
+  }, [showToast]);
 
-  const updateProduct = (id, updatedFields) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updatedFields } : p));
+  const updateProduct = useCallback((id, updatedFields) => {
+    setProducts(prev => prev.map(p => {
+      if (p.id === id) {
+        return { ...p, ...updatedFields };
+      }
+      return p;
+    }));
+    // Also sync with showcase bag if prices/names changed
+    setBag(prev => prev.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          name: updatedFields.name || item.name,
+          price: updatedFields.price !== undefined ? updatedFields.price : item.price,
+          sku: updatedFields.sku || item.sku,
+          image: updatedFields.images ? updatedFields.images[0] : item.image
+        };
+      }
+      return item;
+    }));
     showToast('Product updated successfully!', 'success');
-  };
+  }, [showToast]);
 
-  const deleteProduct = (id) => {
+  const deleteProduct = useCallback((id) => {
     setProducts(prev => prev.filter(p => p.id !== id));
-    showToast('Product deleted from showcase.', 'info');
-  };
+    setBag(prev => prev.filter(item => item.id !== id));
+    setWishlist(prev => prev.filter(wishId => wishId !== id));
+    showToast('Product removed from showcase.', 'info');
+  }, [showToast]);
 
-  const duplicateProduct = (id) => {
+  const duplicateProduct = useCallback((id) => {
     const source = products.find(p => p.id === id);
     if (!source) return;
     const clone = {
       ...source,
-      id: 'qis-' + Date.now().toString(36),
-      name: `${source.name} (Copy)`,
-      sku: `${source.sku}-CP`,
+      id: 'ql-' + Date.now().toString(36),
+      name: `${source.name} (Duplicate)`,
+      sku: `${source.sku || 'QL'}-COPY`,
       slug: `${source.slug}-copy`
     };
     setProducts(prev => [clone, ...prev]);
     showToast(`Duplicated "${source.name}"`, 'success');
-  };
+  }, [products, showToast]);
 
-  const updateSettingsData = (newSettings) => {
+  const updateSettingsData = useCallback((newSettings) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
-    showToast('Store & WhatsApp settings updated!', 'success');
-  };
+    showToast('Store & WhatsApp configurations updated!', 'success');
+  }, [showToast]);
 
-  const resetToDefaults = () => {
+  const resetToDefaults = useCallback(() => {
     setProducts(INITIAL_PRODUCTS);
     setSettings(BRAND_SETTINGS);
-    showToast('Store catalog reset to default factory data.', 'info');
-  };
+    localStorage.removeItem('qissalabel_products');
+    localStorage.removeItem('qissalabel_settings');
+    showToast('Reset to Qissa Label default catalog.', 'info');
+  }, [showToast]);
 
-  const exportDataJson = () => {
+  const exportDataJson = useCallback(() => {
     const data = {
-      brand: 'QISSA Clothing',
+      brand: 'QISSA LABEL',
       exportedAt: new Date().toISOString(),
       products,
       settings,
@@ -317,13 +342,13 @@ export const StoreProvider = ({ children }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `qissa-catalog-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `qissa-label-catalog-${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('Catalog exported as JSON backup.', 'success');
-  };
+  }, [products, settings, inquiries, showToast]);
 
-  const importDataJson = (jsonStr) => {
+  const importDataJson = useCallback((jsonStr) => {
     try {
       const parsed = JSON.parse(jsonStr);
       if (parsed.products && Array.isArray(parsed.products)) {
@@ -332,22 +357,31 @@ export const StoreProvider = ({ children }) => {
       if (parsed.settings) {
         setSettings(prev => ({ ...prev, ...parsed.settings }));
       }
-      showToast('Catalog imported successfully!', 'success');
+      showToast('Qissa Label catalog imported successfully!', 'success');
       return true;
     } catch (e) {
       showToast('Invalid JSON file format', 'error');
       return false;
     }
-  };
+  }, [showToast]);
 
   // Navigate helper
-  const navigateTo = (page, productId = null) => {
+  const navigateTo = useCallback((page, productId = null) => {
     setCurrentPage(page);
     if (productId) {
       setActiveProductId(productId);
+      window.location.hash = `product/${productId}`;
+    } else if (page === 'catalog') {
+      window.location.hash = 'catalog';
+    } else if (page === 'stories') {
+      window.location.hash = 'stories';
+    } else if (page === 'admin') {
+      window.location.hash = 'admin';
+    } else if (page === 'home') {
+      window.location.hash = '';
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
   return (
     <StoreContext.Provider

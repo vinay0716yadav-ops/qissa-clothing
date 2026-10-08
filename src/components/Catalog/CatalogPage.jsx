@@ -9,7 +9,8 @@ import {
   Grid, 
   LayoutGrid, 
   Sparkles,
-  Search
+  Search,
+  RotateCcw
 } from 'lucide-react';
 
 export const CatalogPage = () => {
@@ -28,7 +29,6 @@ export const CatalogPage = () => {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState('featured'); // 'featured', 'price-low', 'price-high', 'newest', 'rating'
   const [selectedSizes, setSelectedSizes] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
   const [maxPrice, setMaxPrice] = useState(15000);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [gridCols, setGridCols] = useState(3); // 2, 3, or 4 cols
@@ -44,50 +44,41 @@ export const CatalogPage = () => {
   ];
 
   const allSizes = ["XS", "S", "M", "L", "XL", "XXL", "38 (S)", "40 (M)", "42 (L)", "44 (XL)"];
-  const allColors = [
-    { name: "Black / Onyx", hex: "#111111" },
-    { name: "Emerald", hex: "#0B4F3A" },
-    { name: "Ruby / Wine", hex: "#621226" },
-    { name: "Ivory / Sand", hex: "#E8D3C3" },
-    { name: "Indigo / Navy", hex: "#1A2942" },
-    { name: "Terracotta", hex: "#B85D43" }
-  ];
 
-  // Filter & Sort Logic
+  // Ultra-Smooth Filter & Search Computation
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      // Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchName = p.name.toLowerCase().includes(q);
-        const matchDesc = (p.description || '').toLowerCase().includes(q);
-        const matchCat = (p.category || '').toLowerCase().includes(q);
-        const matchTag = (p.tag || '').toLowerCase().includes(q);
-        if (!matchName && !matchDesc && !matchCat && !matchTag) return false;
+      // Search matching across multiple fields
+      if (searchQuery && searchQuery.trim()) {
+        const queryTerms = searchQuery.toLowerCase().trim().split(/\s+/);
+        const searchableText = `${p.name} ${p.category} ${p.subtitle || ''} ${p.description || ''} ${p.tag || ''} ${p.fabric || ''} ${p.sku || ''} ${(p.colors || []).map(c => c.name).join(' ')}`.toLowerCase();
+        
+        const allTermsMatch = queryTerms.every(term => searchableText.includes(term));
+        if (!allTermsMatch) return false;
       }
 
-      // Category
+      // Category Filter
       if (categoryFilter !== 'all' && p.category !== categoryFilter) {
         return false;
       }
 
-      // Gender
+      // Gender Filter
       if (genderFilter !== 'all' && p.gender !== genderFilter && p.gender !== 'Unisex') {
         return false;
       }
 
-      // Sizes
+      // Size Filter
       if (selectedSizes.length > 0) {
         const hasMatchingSize = p.sizes?.some(s => selectedSizes.includes(s));
         if (!hasMatchingSize) return false;
       }
 
-      // Price
+      // Max Price Filter
       if (p.price > maxPrice) {
         return false;
       }
 
-      // In-stock
+      // In-Stock Only
       if (inStockOnly && !p.inStock) {
         return false;
       }
@@ -102,6 +93,17 @@ export const CatalogPage = () => {
     });
   }, [products, categoryFilter, genderFilter, searchQuery, selectedSizes, maxPrice, inStockOnly, sortBy]);
 
+  // Compute product count per category dynamically
+  const categoryCounts = useMemo(() => {
+    const counts = { all: products.length };
+    allCategories.forEach(cat => {
+      if (cat !== 'all') {
+        counts[cat] = products.filter(p => p.category === cat).length;
+      }
+    });
+    return counts;
+  }, [products]);
+
   const toggleSize = (size) => {
     setSelectedSizes(prev => 
       prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
@@ -113,28 +115,28 @@ export const CatalogPage = () => {
     setGenderFilter('all');
     setSearchQuery('');
     setSelectedSizes([]);
-    setSelectedColors([]);
     setMaxPrice(15000);
     setInStockOnly(false);
   };
 
   const activeFiltersCount = (categoryFilter !== 'all' ? 1 : 0) + 
     (genderFilter !== 'all' ? 1 : 0) + 
-    (searchQuery ? 1 : 0) + 
+    (searchQuery.trim() ? 1 : 0) + 
     selectedSizes.length + 
-    (inStockOnly ? 1 : 0);
+    (inStockOnly ? 1 : 0) +
+    (maxPrice < 15000 ? 1 : 0);
 
   return (
-    <div className="bg-white min-h-screen py-8">
+    <div className="bg-white min-h-screen py-8 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Top Header Row - Nike Style */}
+        {/* Top Header Row - Nike High-Fashion Style */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-zinc-100">
           <div>
-            <div className="text-xs uppercase font-bold tracking-widest text-zinc-500 mb-1 flex items-center gap-1.5">
-              <span>QISSA SHOWCASE CATALOG</span>
+            <div className="text-xs uppercase font-extrabold tracking-widest text-zinc-400 mb-1 flex items-center gap-2">
+              <span>QISSA LABEL SHOWCASE</span>
               <span>•</span>
-              <span className="text-black font-extrabold">{filteredProducts.length} Items</span>
+              <span className="text-black font-black">{filteredProducts.length} Fits Available</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase font-heading tracking-tight text-black">
               {categoryFilter === 'all' 
@@ -149,12 +151,12 @@ export const CatalogPage = () => {
             {/* Desktop Filter Toggle Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="hidden lg:flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-800 hover:text-black border border-zinc-200 rounded-full hover:bg-zinc-50 transition-colors"
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-zinc-800 hover:text-black border border-zinc-200 rounded-full hover:bg-zinc-50 transition-colors cursor-pointer"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 bg-black text-white text-[10px] rounded-full flex items-center justify-center">
+                <span className="w-4 h-4 bg-black text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                   {activeFiltersCount}
                 </span>
               )}
@@ -163,7 +165,7 @@ export const CatalogPage = () => {
             {/* Mobile Filter Trigger Button */}
             <button
               onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-800 border border-zinc-200 rounded-full hover:bg-zinc-50"
+              className="lg:hidden flex items-center gap-2 px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-zinc-800 border border-zinc-200 rounded-full hover:bg-zinc-50 cursor-pointer"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Filters ({activeFiltersCount})</span>
@@ -174,7 +176,7 @@ export const CatalogPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none pl-4 pr-9 py-2 bg-zinc-100 hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider text-black rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-black transition-colors"
+                className="appearance-none pl-4 pr-9 py-2 bg-zinc-100 hover:bg-zinc-200 text-xs font-extrabold uppercase tracking-wider text-black rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-black transition-colors"
               >
                 <option value="featured">Sort By: Featured</option>
                 <option value="newest">Sort By: Newest Drops</option>
@@ -189,14 +191,14 @@ export const CatalogPage = () => {
             <div className="hidden sm:flex items-center gap-1 bg-zinc-100 p-1 rounded-full border border-zinc-200">
               <button
                 onClick={() => setGridCols(2)}
-                className={`p-1.5 rounded-full transition-colors ${gridCols === 2 ? 'bg-white shadow-sm text-black' : 'text-zinc-500 hover:text-black'}`}
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${gridCols === 2 ? 'bg-white shadow-sm text-black' : 'text-zinc-500 hover:text-black'}`}
                 title="2 Columns"
               >
                 <Grid className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => setGridCols(3)}
-                className={`p-1.5 rounded-full transition-colors ${gridCols === 3 ? 'bg-white shadow-sm text-black' : 'text-zinc-500 hover:text-black'}`}
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${gridCols === 3 ? 'bg-white shadow-sm text-black' : 'text-zinc-500 hover:text-black'}`}
                 title="3 Columns"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -209,38 +211,45 @@ export const CatalogPage = () => {
         {/* Active Filter Chips */}
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-4 pb-2">
-            <span className="text-xs font-semibold text-zinc-400 mr-1">Active:</span>
+            <span className="text-xs font-bold text-zinc-400 mr-1">Active:</span>
             
             {categoryFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-medium">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-semibold">
                 Category: {categoryFilter}
                 <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => setCategoryFilter('all')} />
               </span>
             )}
 
             {genderFilter !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-medium">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-semibold">
                 Gender: {genderFilter}
                 <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => setGenderFilter('all')} />
               </span>
             )}
 
             {searchQuery && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-medium">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-semibold">
                 Search: "{searchQuery}"
                 <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => setSearchQuery('')} />
               </span>
             )}
 
             {selectedSizes.map(s => (
-              <span key={s} className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-medium">
+              <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-semibold">
                 Size: {s}
                 <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => toggleSize(s)} />
               </span>
             ))}
 
+            {maxPrice < 15000 && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-semibold">
+                Under {settings.currencySymbol}{maxPrice.toLocaleString()}
+                <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => setMaxPrice(15000)} />
+              </span>
+            )}
+
             {inStockOnly && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-medium">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-black rounded-full text-xs font-semibold">
                 In Stock Only
                 <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => setInStockOnly(false)} />
               </span>
@@ -248,9 +257,10 @@ export const CatalogPage = () => {
 
             <button
               onClick={clearAllFilters}
-              className="text-xs font-bold text-red-600 hover:underline ml-2"
+              className="text-xs font-bold text-red-600 hover:underline ml-2 cursor-pointer flex items-center gap-1"
             >
-              Clear All
+              <RotateCcw className="w-3 h-3" />
+              <span>Clear All</span>
             </button>
           </div>
         )}
@@ -269,7 +279,7 @@ export const CatalogPage = () => {
                 </h3>
                 <div className="flex flex-col space-y-2">
                   {['all', 'Women', 'Men', 'Unisex'].map(g => (
-                    <label key={g} className="flex items-center gap-2.5 text-sm cursor-pointer hover:text-black">
+                    <label key={g} className="flex items-center gap-2.5 text-xs sm:text-sm cursor-pointer hover:text-black">
                       <input
                         type="radio"
                         name="gender"
@@ -277,8 +287,8 @@ export const CatalogPage = () => {
                         onChange={() => setGenderFilter(g)}
                         className="accent-black w-4 h-4 cursor-pointer"
                       />
-                      <span className={genderFilter === g ? 'font-bold text-black' : 'text-zinc-600'}>
-                        {g === 'all' ? 'All Genders' : g}
+                      <span className={genderFilter === g ? 'font-black text-black' : 'text-zinc-600 font-medium'}>
+                        {g === 'all' ? 'All Showcase Genders' : g}
                       </span>
                     </label>
                   ))}
@@ -288,29 +298,33 @@ export const CatalogPage = () => {
               {/* Categories */}
               <div className="pt-6 border-t border-zinc-100">
                 <h3 className="font-heading text-lg font-black tracking-wide uppercase text-black mb-3">
-                  Capsules & Categories
+                  Capsules & Collections
                 </h3>
-                <div className="flex flex-col space-y-2">
-                  {allCategories.map(cat => (
-                    <button
-                      key={cat}
-                      onClick={() => setCategoryFilter(cat)}
-                      className={`text-left text-sm py-1 transition-colors ${
-                        categoryFilter === cat 
-                          ? 'font-extrabold text-black' 
-                          : 'text-zinc-600 hover:text-black font-medium'
-                      }`}
-                    >
-                      {cat === 'all' ? 'All Collections' : cat}
-                    </button>
-                  ))}
+                <div className="flex flex-col space-y-1.5">
+                  {allCategories.map(cat => {
+                    const count = categoryCounts[cat] || 0;
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => setCategoryFilter(cat)}
+                        className={`flex items-center justify-between text-left text-xs sm:text-sm py-1.5 px-2 rounded-lg transition-colors cursor-pointer ${
+                          categoryFilter === cat 
+                            ? 'bg-zinc-100 font-black text-black' 
+                            : 'text-zinc-600 hover:text-black font-medium hover:bg-zinc-50'
+                        }`}
+                      >
+                        <span>{cat === 'all' ? 'All Collections' : cat}</span>
+                        <span className="text-[11px] text-zinc-400 font-mono">({count})</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Sizes */}
               <div className="pt-6 border-t border-zinc-100">
                 <h3 className="font-heading text-lg font-black tracking-wide uppercase text-black mb-3">
-                  Sizes
+                  Size Filter
                 </h3>
                 <div className="grid grid-cols-3 gap-2">
                   {allSizes.map(size => {
@@ -319,7 +333,7 @@ export const CatalogPage = () => {
                       <button
                         key={size}
                         onClick={() => toggleSize(size)}
-                        className={`py-2 text-xs font-bold rounded-lg border transition-all ${
+                        className={`py-2 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-black text-white border-black shadow-sm'
                             : 'bg-white text-zinc-700 border-zinc-200 hover:border-black'
@@ -338,7 +352,7 @@ export const CatalogPage = () => {
                   <h3 className="font-heading text-lg font-black tracking-wide uppercase text-black">
                     Max Price
                   </h3>
-                  <span className="text-xs font-bold text-black">
+                  <span className="text-xs font-black text-black">
                     {settings.currencySymbol}{maxPrice.toLocaleString()}
                   </span>
                 </div>
@@ -366,7 +380,7 @@ export const CatalogPage = () => {
                     onChange={(e) => setInStockOnly(e.target.checked)}
                     className="accent-black w-4 h-4 rounded"
                   />
-                  <span className="text-sm font-semibold text-zinc-800">
+                  <span className="text-xs sm:text-sm font-bold text-zinc-800">
                     Ready to Dispatch Only
                   </span>
                 </label>
@@ -381,14 +395,14 @@ export const CatalogPage = () => {
               <div className="py-24 text-center space-y-4 bg-zinc-50 rounded-3xl p-8 border border-zinc-100">
                 <Sparkles className="w-10 h-10 text-zinc-400 mx-auto" />
                 <h3 className="font-heading text-3xl font-black uppercase tracking-tight text-black">
-                  No Matching Drops Found
+                  No Matching Fits Found
                 </h3>
-                <p className="text-sm text-zinc-500 max-w-md mx-auto">
-                  We couldn't find any fits matching your current filter combination. Try clearing your filters or exploring our full catalog.
+                <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
+                  We couldn't find any fits matching "{searchQuery}" and your current filter combination. Try resetting your filters.
                 </p>
                 <button
                   onClick={clearAllFilters}
-                  className="px-6 py-3 bg-black text-white font-extrabold text-xs uppercase tracking-wider rounded-full hover:bg-zinc-800 transition-colors"
+                  className="px-6 py-3 bg-black text-white font-extrabold text-xs uppercase tracking-wider rounded-full hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
                   Reset All Filters
                 </button>
@@ -421,7 +435,7 @@ export const CatalogPage = () => {
                 </h2>
                 <button
                   onClick={() => setMobileFilterOpen(false)}
-                  className="p-2 hover:bg-zinc-100 rounded-full"
+                  className="p-2 hover:bg-zinc-100 rounded-full cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -437,7 +451,7 @@ export const CatalogPage = () => {
                     <button
                       key={cat}
                       onClick={() => setCategoryFilter(cat)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase cursor-pointer ${
                         categoryFilter === cat ? 'bg-black text-white' : 'bg-zinc-100 text-zinc-700'
                       }`}
                     >
@@ -457,7 +471,7 @@ export const CatalogPage = () => {
                     <button
                       key={size}
                       onClick={() => toggleSize(size)}
-                      className={`py-2 text-xs font-bold rounded-lg border ${
+                      className={`py-2 text-xs font-bold rounded-lg border cursor-pointer ${
                         selectedSizes.includes(size) ? 'bg-black text-white border-black' : 'bg-white text-zinc-700 border-zinc-200'
                       }`}
                     >
@@ -471,13 +485,13 @@ export const CatalogPage = () => {
             <div className="pt-4 border-t border-zinc-100 flex gap-3">
               <button
                 onClick={clearAllFilters}
-                className="flex-1 py-3 text-xs font-bold uppercase tracking-wider border border-zinc-300 rounded-xl"
+                className="flex-1 py-3 text-xs font-bold uppercase tracking-wider border border-zinc-300 rounded-xl cursor-pointer"
               >
                 Reset
               </button>
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 py-3 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl"
+                className="flex-1 py-3 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl cursor-pointer"
               >
                 Apply ({filteredProducts.length})
               </button>
