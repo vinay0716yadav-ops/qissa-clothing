@@ -61,7 +61,7 @@ export const Footer = () => {
             </button>
             <button 
               onClick={() => navigateTo('admin')}
-              className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 transition-colors text-sm font-sans font-bold cursor-pointer"
+              className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 transition-colors text-sm font-sans font-bold cursor-pointer whitespace-nowrap"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>ADMIN ATELIER PANEL</span>
@@ -79,10 +79,10 @@ export const Footer = () => {
                   href={`https://wa.me/${(settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors flex items-center gap-1"
+                  className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>WhatsApp Order Tracking</span>
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="whitespace-nowrap">WhatsApp Order Tracking</span>
                 </a>
               </li>
               <li>
@@ -139,37 +139,37 @@ export const Footer = () => {
                 QISSA LABEL
               </span>
               <p className="text-xs text-zinc-400 max-w-sm leading-relaxed">
-                Contemporary apparel & artisanal couture celebrating the beauty of personal storytelling. Built with zero-friction direct WhatsApp ordering.
+                Contemporary apparel & artisanal couture celebrating personal storytelling. Built with zero-friction direct WhatsApp ordering.
               </p>
             </div>
 
-            {/* Direct WhatsApp Callout */}
+            {/* Direct WhatsApp Callout - Single Line */}
             <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Official WhatsApp Order Line
+              <div className="flex items-center justify-between whitespace-nowrap">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>Official WhatsApp Line</span>
                 </span>
-                <span className="text-[11px] text-zinc-400">Available Daily</span>
+                <span className="text-[11px] text-zinc-400 whitespace-nowrap">Available Daily</span>
               </div>
               <a
                 href={`https://wa.me/${(settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-base font-black text-white hover:text-[#25D366] transition-colors"
+                className="flex items-center gap-2 text-base font-black text-white hover:text-[#25D366] transition-colors whitespace-nowrap font-mono"
               >
-                <MessageCircle className="w-5 h-5 text-[#25D366]" />
-                <span>{settings.displayPhone || "+91 95459 83060"}</span>
+                <MessageCircle className="w-5 h-5 text-[#25D366] shrink-0" />
+                <span className="whitespace-nowrap">{settings.displayPhone || "+91 95459 83060"}</span>
               </a>
             </div>
 
             {/* Social handles */}
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-3 pt-1 whitespace-nowrap">
               <a
                 href={settings.instagramUrl || "https://www.instagram.com/qissalabel/"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-pink-400 transition-colors"
+                className="p-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-pink-400 transition-colors shrink-0"
                 title="Follow @qissalabel on Instagram"
               >
                 <Instagram className="w-4 h-4" />
@@ -179,13 +179,13 @@ export const Footer = () => {
                 href={`https://wa.me/${(settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-emerald-400 transition-colors"
+                className="p-2.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-emerald-400 transition-colors shrink-0"
                 title="WhatsApp Us"
               >
                 <MessageCircle className="w-4 h-4" />
               </a>
 
-              <span className="text-xs text-zinc-400 font-semibold">
+              <span className="text-xs text-zinc-400 font-semibold whitespace-nowrap">
                 Instagram: <a href={settings.instagramUrl || "https://www.instagram.com/qissalabel/"} target="_blank" rel="noopener noreferrer" className="text-white hover:underline font-bold">@qissalabel</a>
               </span>
             </div>
@@ -196,13 +196,13 @@ export const Footer = () => {
         {/* Bottom Sub-Footer - Nike Style */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-zinc-300 font-bold">
-              <MapPin className="w-3.5 h-3.5 text-white" />
+          <div className="flex items-center gap-3 whitespace-nowrap">
+            <span className="flex items-center gap-1 text-zinc-300 font-bold whitespace-nowrap">
+              <MapPin className="w-3.5 h-3.5 text-white shrink-0" />
               <span>India ({settings.currencyCode || 'INR'} {settings.currencySymbol || '₹'})</span>
             </span>
             <span>•</span>
-            <span>© {new Date().getFullYear()} QISSA LABEL ATELIER. All Rights Reserved.</span>
+            <span className="whitespace-nowrap">© {new Date().getFullYear()} QISSA LABEL ATELIER. All Rights Reserved.</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-6">
@@ -211,7 +211,7 @@ export const Footer = () => {
             <span className="hover:text-zinc-300 transition-colors cursor-pointer">Privacy Policy</span>
             <button 
               onClick={() => navigateTo('admin')}
-              className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="text-zinc-400 hover:text-white transition-colors cursor-pointer whitespace-nowrap"
             >
               Admin Portal
             </button>

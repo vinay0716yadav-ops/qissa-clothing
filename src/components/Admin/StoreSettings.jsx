@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { MessageCircle, Save, RotateCcw, ExternalLink, ShieldCheck, Sparkles } from 'lucide-react';
+import { MessageCircle, Save, RotateCcw, ExternalLink, ShieldCheck, Sparkles, Eye, EyeOff, Camera, Image } from 'lucide-react';
 import { Instagram } from '../UI/Icons';
 
 export const StoreSettings = () => {
   const { settings, updateSettingsData, resetToDefaults, showToast } = useStore();
 
   const [form, setForm] = useState({ ...settings });
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +64,7 @@ export const StoreSettings = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-black"
               />
-              <span className="text-[11px] text-zinc-400 mt-1 block">
+              <span className="text-[11px] text-zinc-400 mt-1 block whitespace-nowrap">
                 Current: {form.whatsappNumber || '919545983060'}
               </span>
             </div>
@@ -93,7 +94,7 @@ export const StoreSettings = () => {
               href={sampleTestUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow"
+              className="px-4 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow whitespace-nowrap"
             >
               <span>Test WhatsApp Link</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -118,7 +119,70 @@ export const StoreSettings = () => {
           </div>
         </div>
 
-        {/* Card 2: Brand Identity & Social Links */}
+        {/* Card 2: Storefront Cover & Hero Configuration */}
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-zinc-100">
+            <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl">
+              <Camera className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-heading text-xl font-black uppercase tracking-wide text-black">
+                Storefront Hero Banner & Cover
+              </h3>
+              <p className="text-xs text-zinc-500">
+                Manage the high-impact cover photo and headline shown on your homepage.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
+                Hero Cover Image URL
+              </label>
+              <input
+                type="url"
+                name="heroImage"
+                value={form.heroImage || ''}
+                onChange={handleChange}
+                placeholder="https://images.unsplash.com/..."
+                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-xs sm:text-sm font-mono focus:outline-none focus:border-black"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
+                  Top Pill Tagline
+                </label>
+                <input
+                  type="text"
+                  name="heroTagline"
+                  value={form.heroTagline || ''}
+                  onChange={handleChange}
+                  placeholder="QISSA LABEL ATELIER • DROP 04 LIVE"
+                  className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-xs focus:outline-none focus:border-black font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
+                  Hero Headline
+                </label>
+                <input
+                  type="text"
+                  name="heroHeading"
+                  value={form.heroHeading || ''}
+                  onChange={handleChange}
+                  placeholder="WEAR YOUR NARRATIVE."
+                  className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-xs focus:outline-none focus:border-black font-semibold"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Brand Identity & Security Password */}
         <div className="bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-sm space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-zinc-100">
             <div className="p-2.5 bg-zinc-100 text-black rounded-xl">
@@ -126,10 +190,10 @@ export const StoreSettings = () => {
             </div>
             <div>
               <h3 className="font-heading text-xl font-black uppercase tracking-wide text-black">
-                Brand & Social Profiles
+                Brand & Admin Security
               </h3>
               <p className="text-xs text-zinc-500">
-                Official social handles and store metadata.
+                Official social handles and secure admin password control.
               </p>
             </div>
           </div>
@@ -150,19 +214,6 @@ export const StoreSettings = () => {
 
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
-                Brand Tagline
-              </label>
-              <input
-                type="text"
-                name="tagline"
-                value={form.tagline}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
                 Instagram Profile URL
               </label>
               <input
@@ -171,19 +222,6 @@ export const StoreSettings = () => {
                 value={form.instagramUrl}
                 onChange={handleChange}
                 placeholder="https://www.instagram.com/qissalabel/"
-                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
-                Concierge Support Email
-              </label>
-              <input
-                type="email"
-                name="supportEmail"
-                value={form.supportEmail}
-                onChange={handleChange}
                 className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
               />
             </div>
@@ -203,21 +241,31 @@ export const StoreSettings = () => {
             />
           </div>
 
-          {/* Admin Security Password */}
-          <div className="pt-2">
+          {/* Admin Security Password (Completely Masked) */}
+          <div className="pt-2 border-t border-zinc-100">
             <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
-              Admin Access Password (Current: {form.adminPassword || 'qissalabel@2025'})
+              Admin Access Password
             </label>
-            <input
-              type="text"
-              name="adminPassword"
-              value={form.adminPassword || ''}
-              onChange={handleChange}
-              placeholder="e.g. qissalabel@2025"
-              className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm font-mono focus:outline-none focus:border-black font-bold"
-            />
+            <div className="relative">
+              <input
+                type={showAdminPassword ? "text" : "password"}
+                name="adminPassword"
+                value={form.adminPassword || ''}
+                onChange={handleChange}
+                placeholder="••••••••••••"
+                className="w-full pl-4 pr-11 py-2.5 border border-zinc-300 rounded-xl text-sm font-mono focus:outline-none focus:border-black font-bold"
+              />
+              <button
+                type="button"
+                onClick={() => setShowAdminPassword(!showAdminPassword)}
+                className="absolute right-3.5 top-3 text-zinc-400 hover:text-black cursor-pointer"
+                title={showAdminPassword ? "Hide password" : "Show password"}
+              >
+                {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             <span className="text-[11px] text-zinc-400 mt-1 block">
-              Used to unlock the /admin panel and manage products.
+              Used to unlock the /admin console. Passwords remain private and masked.
             </span>
           </div>
         </div>
@@ -227,7 +275,7 @@ export const StoreSettings = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="px-5 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-5 py-2.5 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Reset to Qissa Label Defaults</span>
@@ -235,7 +283,7 @@ export const StoreSettings = () => {
 
           <button
             type="submit"
-            className="px-8 py-3 bg-black hover:bg-zinc-800 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+            className="px-8 py-3 bg-black hover:bg-zinc-800 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
           >
             <Save className="w-4 h-4" />
             <span>Save All Settings</span>
