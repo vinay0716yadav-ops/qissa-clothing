@@ -267,7 +267,8 @@ export const BRAND_SETTINGS = {
   currencyCode: "INR",
   announcementText: "⚡ NEW FESTIVE & STREETWEAR DROP IS LIVE • DIRECT WHATSAPP CONCIERGE ORDERING • FREE PAN-INDIA EXPRESS SHIPPING",
   announcementLink: "/catalog",
-  adminPin: "1234",
+  adminPassword: "qissalabel@2025",
+  adminPin: "qissalabel@2025",
   supportEmail: "orders@qissalabel.com",
   storeLocation: "Flagship Atelier: Mumbai & Bengaluru • Pan-India & Global Express",
   messageTemplate: `Salam / Hi Qissa Label! 🧵✨

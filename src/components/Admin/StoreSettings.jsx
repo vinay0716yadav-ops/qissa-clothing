@@ -203,33 +203,22 @@ export const StoreSettings = () => {
             />
           </div>
 
-          {/* Currency Settings */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
-                Currency Symbol
-              </label>
-              <input
-                type="text"
-                name="currencySymbol"
-                value={form.currencySymbol}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm font-bold focus:outline-none focus:border-black"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
-                Currency Code (ISO)
-              </label>
-              <input
-                type="text"
-                name="currencyCode"
-                value={form.currencyCode}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm font-mono focus:outline-none focus:border-black"
-              />
-            </div>
+          {/* Admin Security Password */}
+          <div className="pt-2">
+            <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1.5">
+              Admin Access Password (Current: {form.adminPassword || 'qissalabel@2025'})
+            </label>
+            <input
+              type="text"
+              name="adminPassword"
+              value={form.adminPassword || ''}
+              onChange={handleChange}
+              placeholder="e.g. qissalabel@2025"
+              className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm font-mono focus:outline-none focus:border-black font-bold"
+            />
+            <span className="text-[11px] text-zinc-400 mt-1 block">
+              Used to unlock the /admin panel and manage products.
+            </span>
           </div>
         </div>
 
