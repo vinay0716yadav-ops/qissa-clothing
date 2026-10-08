@@ -101,7 +101,7 @@ export const Navbar = () => {
     setCategoryFilter(category);
     setMobileMenuOpen(false);
     setSearchFocused(false);
-    setHoveredNav(null);
+    setActiveMegaMenu(null);
     navigateTo(page);
   };
 

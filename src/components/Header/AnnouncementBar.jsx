@@ -1,51 +1,89 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import { MessageCircle, Sparkles, ChevronRight, Lock } from 'lucide-react';
 
 export const AnnouncementBar = () => {
-  const { settings, navigateTo } = useStore();
+  const { settings, navigateTo, isAdminAuthenticated } = useStore();
+
+  const messages = [
+    settings.announcementText || "⚡ COMPLIMENTARY PAN-INDIA EXPRESS SHIPPING ON ALL ORDERS",
+    "🧵 ARTISANAL HANDLOOM CHANDERI & 450 GSM HEAVYWEIGHT STREETWEAR",
+    "✨ 1-ON-1 PERSONAL STYLIST & BESPOKE SIZING ON WHATSAPP"
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % messages.length);
+        setFade(true);
+      }, 300);
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [messages.length]);
+
+  const cleanPhone = (settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '');
 
   return (
-    <div className="bg-[#111111] text-zinc-300 text-[11px] sm:text-xs font-semibold tracking-wide py-2 px-4 border-b border-zinc-800">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left: Quick badge */}
-        <div className="hidden md:flex items-center gap-2 text-zinc-400 whitespace-nowrap">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
-          <span className="text-zinc-300 font-bold">QISSA LABEL CONCIERGE</span>
-          <span className="text-zinc-600">•</span>
-          <span className="whitespace-nowrap">Direct WhatsApp Order Desk (+91 95459 83060)</span>
-        </div>
-
-        {/* Center: Running Ticker */}
-        <div 
-          onClick={() => navigateTo('catalog')}
-          className="mx-auto flex items-center gap-2 cursor-pointer hover:text-white transition-colors duration-200 text-center whitespace-nowrap"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span className="font-extrabold tracking-wider text-white truncate max-w-[280px] sm:max-w-none">
-            {settings.announcementText || "⚡ NEW FESTIVE & STREETWEAR DROP IS LIVE • FREE PAN-INDIA SHIPPING"}
+    <div className="bg-[#0c0c0c] text-zinc-300 text-[11px] sm:text-xs tracking-wider py-2.5 px-4 border-b border-zinc-900 select-none">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        
+        {/* Left: Minimalist Live Concierge Badge */}
+        <div className="hidden lg:flex items-center gap-2 text-zinc-400 whitespace-nowrap text-[11px]">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span className="font-extrabold tracking-widest text-zinc-300 uppercase">
+            LIVE ATELIER CONCIERGE
           </span>
         </div>
 
-        {/* Right: Quick actions - Single Line Guaranteed */}
-        <div className="hidden md:flex items-center gap-4 text-zinc-400 whitespace-nowrap">
+        {/* Center: Smooth Rotating Luxury Announcement */}
+        <div 
+          onClick={() => navigateTo('catalog')}
+          className="flex-1 flex items-center justify-center gap-2 cursor-pointer text-center group py-0.5"
+        >
+          <Sparkles className="w-3 h-3 text-amber-400 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity" />
+          <span 
+            className={`font-black uppercase tracking-[0.12em] sm:tracking-[0.16em] text-zinc-200 group-hover:text-white transition-all duration-300 truncate max-w-[280px] sm:max-w-none text-[10.5px] sm:text-[11.5px] ${
+              fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+            }`}
+          >
+            {messages[currentIndex]}
+          </span>
+          <ChevronRight className="w-3 h-3 text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 hidden sm:inline-block" />
+        </div>
+
+        {/* Right: Sleek Single-Line WhatsApp & Admin Button */}
+        <div className="hidden sm:flex items-center gap-3.5 text-zinc-400 whitespace-nowrap text-[11px]">
           <a
-            href={`https://wa.me/${(settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '')}`}
+            href={`https://wa.me/${cleanPhone}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors font-mono whitespace-nowrap shrink-0"
+            className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors font-mono whitespace-nowrap shrink-0 group"
           >
-            <MessageCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span className="whitespace-nowrap">{settings.displayPhone || '+91 95459 83060'}</span>
+            <MessageCircle className="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="whitespace-nowrap font-medium text-zinc-300 group-hover:text-emerald-300">
+              {settings.displayPhone || '+91 95459 83060'}
+            </span>
           </a>
-          <span className="text-zinc-700">|</span>
+
+          <span className="text-zinc-800">|</span>
+
           <button 
             onClick={() => navigateTo('admin')} 
-            className="text-zinc-400 hover:text-white transition-colors text-[11px] uppercase tracking-wider font-extrabold cursor-pointer whitespace-nowrap"
+            className="text-zinc-400 hover:text-white transition-colors text-[10px] sm:text-[11px] uppercase tracking-widest font-black cursor-pointer whitespace-nowrap flex items-center gap-1"
           >
-            Admin Panel
+            <Lock className="w-2.5 h-2.5 text-zinc-500" />
+            <span>{isAdminAuthenticated ? 'Admin Atelier' : 'Admin'}</span>
           </button>
         </div>
+
       </div>
     </div>
   );

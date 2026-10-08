@@ -18,6 +18,9 @@ import {
 export const ProductManager = () => {
   const { 
     products, 
+    categories,
+    addCategory,
+    deleteCategory,
     updateProduct, 
     deleteProduct, 
     duplicateProduct, 
@@ -29,17 +32,8 @@ export const ProductManager = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-
-  const categories = [
-    "all",
-    "Co-ord Sets",
-    "Streetwear & Hoodies",
-    "Dresses & Anarkalis",
-    "Men's Couture",
-    "Sarees & Ensembles",
-    "Outerwear & Jackets",
-    "Bottoms & Pants"
-  ];
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryInput, setNewCategoryInput] = useState('');
 
   // Instant smooth search and filter
   const filtered = useMemo(() => {
@@ -77,15 +71,24 @@ export const ProductManager = () => {
     updateProduct(p.id, { inStock: !p.inStock });
   };
 
+  const handleQuickAddCategory = (e) => {
+    e.preventDefault();
+    if (newCategoryInput.trim()) {
+      addCategory(newCategoryInput.trim());
+      setNewCategoryInput('');
+      setIsAddingCategory(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       
       {/* Top Bar: Search, Category Filter, and Add Drop Button */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         
-        <div className="flex flex-1 items-center gap-3">
+        <div className="flex flex-1 flex-wrap items-center gap-3">
           {/* Search */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-zinc-400" />
             <input
               type="text"
@@ -102,16 +105,55 @@ export const ProductManager = () => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-3.5 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold focus:outline-none focus:border-black shadow-sm cursor-pointer"
           >
-            {categories.map(c => (
-              <option key={c} value={c}>{c === 'all' ? 'All Collections' : c}</option>
-            ))}
+            <option value="all">All Collections ({products.length})</option>
+            {categories.map(c => {
+              const count = products.filter(p => p.category === c).length;
+              return (
+                <option key={c} value={c}>{c} ({count})</option>
+              );
+            })}
           </select>
+
+          {/* Quick Category Add Button */}
+          {isAddingCategory ? (
+            <form onSubmit={handleQuickAddCategory} className="flex items-center gap-1.5 animate-fade-in">
+              <input
+                type="text"
+                placeholder="Category name..."
+                value={newCategoryInput}
+                onChange={(e) => setNewCategoryInput(e.target.value)}
+                className="px-3 py-1.5 bg-white border border-amber-400 rounded-lg text-xs font-semibold focus:outline-none"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="px-3 py-1.5 bg-black text-white text-xs font-black rounded-lg uppercase"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAddingCategory(false)}
+                className="px-2 py-1.5 bg-zinc-200 text-zinc-600 text-xs rounded-lg"
+              >
+                ✕
+              </button>
+            </form>
+          ) : (
+            <button
+              onClick={() => setIsAddingCategory(true)}
+              className="px-3.5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-black text-xs uppercase tracking-wider rounded-xl transition-colors border border-zinc-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <Plus className="w-3.5 h-3.5 text-zinc-600" />
+              <span>+ New Category</span>
+            </button>
+          )}
         </div>
 
         {/* Add Product Button */}
         <button
           onClick={handleOpenAdd}
-          className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+          className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Product</span>

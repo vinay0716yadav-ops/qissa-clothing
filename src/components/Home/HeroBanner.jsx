@@ -3,20 +3,12 @@ import { useStore } from '../../context/StoreContext';
 import { ArrowRight, MessageCircle, Sparkles, Camera, Image, X, Check } from 'lucide-react';
 
 export const HeroBanner = () => {
-  const { settings, updateSettingsData, navigateTo, setCategoryFilter, showToast } = useStore();
+  const { settings, updateSettingsData, navigateTo, setCategoryFilter, showToast, isAdminAuthenticated, categories } = useStore();
 
   const [coverModalOpen, setCoverModalOpen] = useState(false);
   const [customCoverUrl, setCustomCoverUrl] = useState('');
 
   const currentHeroImg = settings.heroImage || "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=2000&q=90";
-
-  const featuredDrops = [
-    { label: "Silk Co-ords", category: "Co-ord Sets" },
-    { label: "450 GSM Streetwear", category: "Streetwear & Hoodies" },
-    { label: "Festive Anarkalis", category: "Dresses & Anarkalis" },
-    { label: "Men's Bandhgalas", category: "Men's Couture" },
-    { label: "Pre-Draped Sarees", category: "Sarees & Ensembles" }
-  ];
 
   const curatedCovers = [
     {
@@ -73,17 +65,19 @@ export const HeroBanner = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/30 md:bg-gradient-to-r md:from-black/85 md:via-black/45 md:to-transparent" />
         </div>
 
-        {/* Update Cover Button (Direct on Storefront) */}
-        <div className="absolute top-6 right-6 z-20">
-          <button
-            onClick={() => setCoverModalOpen(true)}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/60 hover:bg-black/90 text-white text-xs font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 hover:border-white/40 transition-all shadow-lg cursor-pointer whitespace-nowrap"
-            title="Update Hero Cover Image"
-          >
-            <Camera className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span>Update Cover Image</span>
-          </button>
-        </div>
+        {/* Update Cover Button (ONLY VISIBLE TO AUTHENTICATED ADMIN) */}
+        {isAdminAuthenticated && (
+          <div className="absolute top-6 right-6 z-20 animate-fade-in">
+            <button
+              onClick={() => setCoverModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/85 hover:bg-black text-white text-xs font-black uppercase tracking-wider backdrop-blur-md border border-amber-400/60 hover:border-amber-400 transition-all shadow-xl cursor-pointer whitespace-nowrap group"
+              title="Admin Atelier: Update Hero Cover Photo"
+            >
+              <Camera className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform shrink-0" />
+              <span className="text-amber-300">Admin: Update Cover Photo</span>
+            </button>
+          </div>
+        )}
 
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
@@ -138,16 +132,16 @@ export const HeroBanner = () => {
                 Quick Explore Drops
               </div>
               <div className="flex flex-wrap gap-2">
-                {featuredDrops.map((drop, idx) => (
+                {categories.slice(0, 6).map((catName, idx) => (
                   <button
                     key={idx}
                     onClick={() => {
-                      setCategoryFilter(drop.category);
+                      setCategoryFilter(catName);
                       navigateTo('catalog');
                     }}
                     className="px-3.5 py-1.5 rounded-full bg-black/40 hover:bg-white hover:text-black border border-white/20 text-xs font-bold text-zinc-200 transition-colors backdrop-blur-sm cursor-pointer whitespace-nowrap"
                   >
-                    {drop.label}
+                    {catName}
                   </button>
                 ))}
               </div>

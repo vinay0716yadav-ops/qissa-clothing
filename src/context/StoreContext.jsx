@@ -18,6 +18,28 @@ export const StoreProvider = ({ children }) => {
     return INITIAL_PRODUCTS;
   });
 
+  // Load categories from localStorage or fallback
+  const [categories, setCategories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('qissalabel_categories');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Error loading categories from storage', e);
+    }
+    return [
+      "Co-ord Sets",
+      "Streetwear & Hoodies",
+      "Dresses & Anarkalis",
+      "Men's Couture",
+      "Sarees & Ensembles",
+      "Outerwear & Jackets",
+      "Bottoms & Pants"
+    ];
+  });
+
   // Load settings
   const [settings, setSettings] = useState(() => {
     try {
@@ -75,12 +97,35 @@ export const StoreProvider = ({ children }) => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  
+  // Admin authentication state with session persistence
+  const [isAdminAuthenticated, setIsAdminAuthenticatedState] = useState(() => {
+    try {
+      return sessionStorage.getItem('qissalabel_admin_auth') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const setIsAdminAuthenticated = useCallback((auth) => {
+    setIsAdminAuthenticatedState(auth);
+    try {
+      if (auth) {
+        sessionStorage.setItem('qissalabel_admin_auth', 'true');
+      } else {
+        sessionStorage.removeItem('qissalabel_admin_auth');
+      }
+    } catch (e) {}
+  }, []);
 
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem('qissalabel_products', JSON.stringify(products));
   }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem('qissalabel_categories', JSON.stringify(categories));
+  }, [categories]);
 
   useEffect(() => {
     localStorage.setItem('qissalabel_settings', JSON.stringify(settings));
@@ -317,6 +362,42 @@ export const StoreProvider = ({ children }) => {
     showToast(`Duplicated "${source.name}"`, 'success');
   }, [products, showToast]);
 
+  // Category Operations (Admin & Storefront)
+  const addCategory = useCallback((categoryName) => {
+    const trimmed = categoryName ? categoryName.trim() : '';
+    if (!trimmed) {
+      showToast('Category name cannot be empty', 'error');
+      return false;
+    }
+    if (categories.some(c => c.toLowerCase() === trimmed.toLowerCase())) {
+      showToast(`Category "${trimmed}" already exists!`, 'info');
+      return false;
+    }
+    setCategories(prev => [...prev, trimmed]);
+    showToast(`Added new category "${trimmed}"`, 'success');
+    return true;
+  }, [categories, showToast]);
+
+  const deleteCategory = useCallback((categoryName) => {
+    if (categories.length <= 1) {
+      showToast('You must keep at least one category.', 'error');
+      return false;
+    }
+    setCategories(prev => prev.filter(c => c !== categoryName));
+    showToast(`Category "${categoryName}" removed.`, 'info');
+    return true;
+  }, [categories, showToast]);
+
+  const updateCategory = useCallback((oldName, newName) => {
+    const trimmed = newName ? newName.trim() : '';
+    if (!trimmed) return false;
+    setCategories(prev => prev.map(c => c === oldName ? trimmed : c));
+    // Also update existing products in that category
+    setProducts(prev => prev.map(p => p.category === oldName ? { ...p, category: trimmed } : p));
+    showToast(`Updated category "${oldName}" to "${trimmed}"`, 'success');
+    return true;
+  }, [showToast]);
+
   const updateSettingsData = useCallback((newSettings) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
     showToast('Store & WhatsApp configurations updated!', 'success');
@@ -324,8 +405,18 @@ export const StoreProvider = ({ children }) => {
 
   const resetToDefaults = useCallback(() => {
     setProducts(INITIAL_PRODUCTS);
+    setCategories([
+      "Co-ord Sets",
+      "Streetwear & Hoodies",
+      "Dresses & Anarkalis",
+      "Men's Couture",
+      "Sarees & Ensembles",
+      "Outerwear & Jackets",
+      "Bottoms & Pants"
+    ]);
     setSettings(BRAND_SETTINGS);
     localStorage.removeItem('qissalabel_products');
+    localStorage.removeItem('qissalabel_categories');
     localStorage.removeItem('qissalabel_settings');
     showToast('Reset to Qissa Label default catalog.', 'info');
   }, [showToast]);
@@ -335,6 +426,7 @@ export const StoreProvider = ({ children }) => {
       brand: 'QISSA LABEL',
       exportedAt: new Date().toISOString(),
       products,
+      categories,
       settings,
       inquiries
     };
@@ -346,13 +438,16 @@ export const StoreProvider = ({ children }) => {
     a.click();
     URL.revokeObjectURL(url);
     showToast('Catalog exported as JSON backup.', 'success');
-  }, [products, settings, inquiries, showToast]);
+  }, [products, categories, settings, inquiries, showToast]);
 
   const importDataJson = useCallback((jsonStr) => {
     try {
       const parsed = JSON.parse(jsonStr);
       if (parsed.products && Array.isArray(parsed.products)) {
         setProducts(parsed.products);
+      }
+      if (parsed.categories && Array.isArray(parsed.categories)) {
+        setCategories(parsed.categories);
       }
       if (parsed.settings) {
         setSettings(prev => ({ ...prev, ...parsed.settings }));
@@ -387,6 +482,7 @@ export const StoreProvider = ({ children }) => {
     <StoreContext.Provider
       value={{
         products,
+        categories,
         settings,
         bag,
         wishlist,
@@ -422,6 +518,9 @@ export const StoreProvider = ({ children }) => {
         updateProduct,
         deleteProduct,
         duplicateProduct,
+        addCategory,
+        deleteCategory,
+        updateCategory,
         updateSettingsData,
         resetToDefaults,
         exportDataJson,

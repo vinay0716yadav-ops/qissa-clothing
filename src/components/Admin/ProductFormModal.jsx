@@ -3,7 +3,7 @@ import { useStore } from '../../context/StoreContext';
 import { X, Plus, Trash2, Image, Sparkles, Check, Link, AlertCircle } from 'lucide-react';
 
 export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => {
-  const { addProduct, updateProduct, settings, showToast } = useStore();
+  const { addProduct, updateProduct, settings, showToast, categories, addCategory } = useStore();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -32,6 +32,8 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newColorName, setNewColorName] = useState('');
   const [newColorHex, setNewColorHex] = useState('#111111');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -236,22 +238,78 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700 mb-1">
-                Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
-              >
-                <option value="Co-ord Sets">Co-ord Sets</option>
-                <option value="Streetwear & Hoodies">Streetwear & Hoodies</option>
-                <option value="Dresses & Anarkalis">Dresses & Anarkalis</option>
-                <option value="Men's Couture">Men's Couture</option>
-                <option value="Sarees & Ensembles">Sarees & Ensembles</option>
-                <option value="Outerwear & Jackets">Outerwear & Jackets</option>
-                <option value="Bottoms & Pants">Bottoms & Pants</option>
-              </select>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
+                  Category *
+                </label>
+                {!isCreatingCategory && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCreatingCategory(true)}
+                    className="text-[10px] font-black text-amber-600 hover:text-black uppercase tracking-wider cursor-pointer"
+                  >
+                    + New Category
+                  </button>
+                )}
+              </div>
+
+              {isCreatingCategory ? (
+                <div className="flex items-center gap-1.5 animate-fade-in">
+                  <input
+                    type="text"
+                    placeholder="e.g. Bridal Wear"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-amber-400 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-amber-500 font-semibold"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newCategoryName.trim()) {
+                        addCategory(newCategoryName.trim());
+                        setFormData({ ...formData, category: newCategoryName.trim() });
+                        setNewCategoryName('');
+                        setIsCreatingCategory(false);
+                      }
+                    }}
+                    className="px-2.5 py-2 bg-black text-white text-[11px] font-black rounded-lg hover:bg-zinc-800 uppercase"
+                  >
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreatingCategory(false);
+                      setNewCategoryName('');
+                    }}
+                    className="px-2 py-2 bg-zinc-200 text-zinc-600 text-[11px] font-bold rounded-lg hover:bg-zinc-300"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={formData.category}
+                  onChange={(e) => {
+                    if (e.target.value === '__add_new__') {
+                      setIsCreatingCategory(true);
+                    } else {
+                      setFormData({ ...formData, category: e.target.value });
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black font-semibold bg-white"
+                >
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                  <option value="__add_new__" className="font-bold text-amber-600">
+                    ➕ + Add New Category...
+                  </option>
+                </select>
+              )}
             </div>
 
             <div>

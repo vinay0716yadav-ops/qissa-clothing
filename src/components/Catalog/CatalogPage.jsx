@@ -16,6 +16,7 @@ import {
 export const CatalogPage = () => {
   const { 
     products, 
+    categories,
     settings, 
     categoryFilter, 
     setCategoryFilter, 
@@ -33,15 +34,7 @@ export const CatalogPage = () => {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [gridCols, setGridCols] = useState(3); // 2, 3, or 4 cols
 
-  const allCategories = [
-    "all",
-    "Co-ord Sets",
-    "Streetwear & Hoodies",
-    "Dresses & Anarkalis",
-    "Men's Couture",
-    "Sarees & Ensembles",
-    "Outerwear & Jackets"
-  ];
+  const allCategories = useMemo(() => ["all", ...categories], [categories]);
 
   const allSizes = ["XS", "S", "M", "L", "XL", "XXL", "38 (S)", "40 (M)", "42 (L)", "44 (XL)"];
 
