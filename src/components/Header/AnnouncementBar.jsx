@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { MessageCircle, Sparkles, ChevronRight, Lock } from 'lucide-react';
+import { MessageCircle, Sparkles, ChevronRight } from 'lucide-react';
 
 export const AnnouncementBar = () => {
-  const { settings, navigateTo, isAdminAuthenticated } = useStore();
+  const { settings, navigateTo } = useStore();
 
   const messages = [
     settings.announcementText || "⚡ COMPLIMENTARY PAN-INDIA EXPRESS SHIPPING ON ALL ORDERS",
@@ -59,8 +59,8 @@ export const AnnouncementBar = () => {
           <ChevronRight className="w-3 h-3 text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 hidden sm:inline-block" />
         </div>
 
-        {/* Right: Sleek Single-Line WhatsApp & Admin Button */}
-        <div className="hidden sm:flex items-center gap-3.5 text-zinc-400 whitespace-nowrap text-[11px]">
+        {/* Right: Sleek Single-Line WhatsApp Order Desk */}
+        <div className="hidden sm:flex items-center text-zinc-400 whitespace-nowrap text-[11px]">
           <a
             href={`https://wa.me/${cleanPhone}`}
             target="_blank"
@@ -72,16 +72,6 @@ export const AnnouncementBar = () => {
               {settings.displayPhone || '+91 95459 83060'}
             </span>
           </a>
-
-          <span className="text-zinc-800">|</span>
-
-          <button 
-            onClick={() => navigateTo('admin')} 
-            className="text-zinc-400 hover:text-white transition-colors text-[10px] sm:text-[11px] uppercase tracking-widest font-black cursor-pointer whitespace-nowrap flex items-center gap-1"
-          >
-            <Lock className="w-2.5 h-2.5 text-zinc-500" />
-            <span>{isAdminAuthenticated ? 'Admin Atelier' : 'Admin'}</span>
-          </button>
         </div>
 
       </div>

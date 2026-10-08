@@ -391,7 +391,7 @@ export const CatalogPage = () => {
                   No Matching Fits Found
                 </h3>
                 <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto">
-                  We couldn't find any fits matching "{searchQuery}" and your current filter combination. Try resetting your filters.
+                  We couldn't find any fits matching {searchQuery.trim() ? `"${searchQuery}" and ` : ''}your current filter combination. Try resetting your filters.
                 </p>
                 <button
                   onClick={clearAllFilters}

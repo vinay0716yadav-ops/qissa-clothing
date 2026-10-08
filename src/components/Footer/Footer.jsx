@@ -59,13 +59,6 @@ export const Footer = () => {
             >
               OFFICIAL SIZE GUIDE
             </button>
-            <button 
-              onClick={() => navigateTo('admin')}
-              className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 transition-colors text-sm font-sans font-bold cursor-pointer whitespace-nowrap"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>ADMIN ATELIER PANEL</span>
-            </button>
           </div>
 
           {/* Col 2: Customer Concierge */}
@@ -206,15 +199,10 @@ export const Footer = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-6">
-            <span className="hover:text-zinc-300 transition-colors cursor-pointer">Fit Guides</span>
+            <span className="hover:text-zinc-300 transition-colors cursor-pointer" onClick={() => setSizeGuideOpen(true)}>Fit Guides</span>
+            <span className="hover:text-zinc-300 transition-colors cursor-pointer" onClick={() => navigateTo('stories')}>The Stories</span>
             <span className="hover:text-zinc-300 transition-colors cursor-pointer">Terms of Showcase</span>
             <span className="hover:text-zinc-300 transition-colors cursor-pointer">Privacy Policy</span>
-            <button 
-              onClick={() => navigateTo('admin')}
-              className="text-zinc-400 hover:text-white transition-colors cursor-pointer whitespace-nowrap"
-            >
-              Admin Portal
-            </button>
           </div>
 
         </div>

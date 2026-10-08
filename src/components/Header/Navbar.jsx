@@ -409,21 +409,11 @@ export const Navbar = () => {
               href={`https://wa.me/${(settings.whatsappNumber || '919545983060').replace(/[^0-9]/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#25D366] text-white rounded-xl font-bold text-sm tracking-wide shadow-sm"
+              className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#25D366] text-white rounded-xl font-bold text-sm tracking-wide shadow-sm whitespace-nowrap"
             >
               <MessageCircle className="w-5 h-5 fill-white" />
               <span>Chat & Order on WhatsApp (+91 95459 83060)</span>
             </a>
-
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                navigateTo('admin');
-              }}
-              className="w-full py-2.5 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider hover:text-black"
-            >
-              Admin Atelier Dashboard
-            </button>
           </div>
         </div>
       )}
