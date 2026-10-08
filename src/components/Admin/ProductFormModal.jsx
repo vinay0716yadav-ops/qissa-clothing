@@ -1,0 +1,542 @@
+import React, { useState, useEffect } from 'react';
+import { useStore } from '../../context/StoreContext';
+import { X, Plus, Trash2, Image, Sparkles, Check, Link } from 'lucide-react';
+
+export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => {
+  const { addProduct, updateProduct, settings } = useStore();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    sku: '',
+    subtitle: '',
+    category: 'Co-ord Sets',
+    gender: 'Women',
+    tag: 'NEW DROP',
+    price: 3999,
+    originalPrice: 4999,
+    inStock: true,
+    isHero: false,
+    description: '',
+    story: '',
+    fabric: '100% Handcrafted Textile',
+    care: 'Dry clean or gentle cold wash.',
+    fit: 'Relaxed tailored fit.',
+    images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [
+      { name: 'Onyx Black', hex: '#111111' },
+      { name: 'Emerald', hex: '#0B4F3A' }
+    ]
+  });
+
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [newColorName, setNewColorName] = useState('');
+  const [newColorHex, setNewColorHex] = useState('#000000');
+
+  useEffect(() => {
+    if (editingProduct) {
+      setFormData({
+        ...editingProduct,
+        images: editingProduct.images || [],
+        sizes: editingProduct.sizes || [],
+        colors: editingProduct.colors || []
+      });
+    } else {
+      setFormData({
+        name: '',
+        sku: 'QIS-' + Math.floor(100 + Math.random() * 900),
+        subtitle: 'Festive & Luxury Apparel',
+        category: 'Co-ord Sets',
+        gender: 'Women',
+        tag: 'NEW DROP',
+        price: 4999,
+        originalPrice: 6499,
+        inStock: true,
+        isHero: false,
+        description: 'Handcrafted luxury piece cut with contemporary lines.',
+        story: 'Woven using traditional techniques with modern minimalism.',
+        fabric: 'Handloom Cotton-Silk Blend',
+        care: 'Dry clean only.',
+        fit: 'True to size tailored fit.',
+        images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80'],
+        sizes: ['S', 'M', 'L', 'XL'],
+        colors: [
+          { name: 'Onyx Black', hex: '#111111' }
+        ]
+      });
+    }
+  }, [editingProduct, isOpen]);
+
+  if (!isOpen) return null;
+
+  const standardSizes = ["XS", "S", "M", "L", "XL", "XXL", "38 (S)", "40 (M)", "42 (L)", "44 (XL)"];
+
+  // Quick preset fashion photo library
+  const curatedFashionImages = [
+    { label: "Emerald Silk", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Ruby Velvet", url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Festive Saree", url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Black Street Hoodie", url: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Raw Linen Co-ord", url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Men's Bandhgala", url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80" },
+    { label: "Selvedge Denim", url: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80" }
+  ];
+
+  const handleSizeToggle = (size) => {
+    setFormData(prev => {
+      const exists = prev.sizes.includes(size);
+      return {
+        ...prev,
+        sizes: exists ? prev.sizes.filter(s => s !== size) : [...prev.sizes, size]
+      };
+    });
+  };
+
+  const handleAddImage = (urlToAdd) => {
+    const targetUrl = urlToAdd || newImageUrl.trim();
+    if (targetUrl) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, targetUrl]
+      }));
+      setNewImageUrl('');
+    }
+  };
+
+  const handleRemoveImage = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleAddColor = () => {
+    if (newColorName.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        colors: [...prev.colors, { name: newColorName.trim(), hex: newColorHex }]
+      }));
+      setNewColorName('');
+      setNewColorHex('#000000');
+    }
+  };
+
+  const handleRemoveColor = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      alert('Product name is required');
+      return;
+    }
+    if (formData.images.length === 0) {
+      alert('Please add at least one image');
+      return;
+    }
+
+    if (editingProduct) {
+      updateProduct(editingProduct.id, formData);
+    } else {
+      addProduct(formData);
+    }
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl animate-scale-up my-8 max-h-[90vh] flex flex-col">
+        
+        {/* Header */}
+        <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+              QISSA ATELIER ADMIN
+            </span>
+            <h2 className="font-heading text-2xl sm:text-3xl font-black uppercase tracking-tight text-black">
+              {editingProduct ? `Edit: ${editingProduct.name}` : 'Add New Clothing Drop'}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-zinc-200 rounded-full text-zinc-600 hover:text-black transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Scrollable Form Body */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+          
+          {/* Row 1: Name, SKU, Tag */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Product Title *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Qissa 'Noor' Chanderi Silk Co-ord Set"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black font-semibold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                SKU / Identifier
+              </label>
+              <input
+                type="text"
+                value={formData.sku}
+                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black uppercase font-mono"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Subtitle, Category, Gender, Tag */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Subtitle
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Women's Luxury Drop"
+                value={formData.subtitle}
+                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Category
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
+              >
+                <option value="Co-ord Sets">Co-ord Sets</option>
+                <option value="Streetwear & Hoodies">Streetwear & Hoodies</option>
+                <option value="Dresses & Anarkalis">Dresses & Anarkalis</option>
+                <option value="Men's Couture">Men's Couture</option>
+                <option value="Sarees & Ensembles">Sarees & Ensembles</option>
+                <option value="Outerwear & Jackets">Outerwear & Jackets</option>
+                <option value="Bottoms & Pants">Bottoms & Pants</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Gender Target
+              </label>
+              <select
+                value={formData.gender}
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
+              >
+                <option value="Women">Women</option>
+                <option value="Men">Men</option>
+                <option value="Unisex">Unisex</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Badge Tag
+              </label>
+              <select
+                value={formData.tag}
+                onChange={(e) => setFormData({ ...formData, tag: e.target.value })}
+                className="w-full px-3.5 py-2.5 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
+              >
+                <option value="NEW DROP">NEW DROP</option>
+                <option value="BEST SELLER">BEST SELLER</option>
+                <option value="LIMITED EDITION">LIMITED EDITION</option>
+                <option value="ICONIC FIT">ICONIC FIT</option>
+                <option value="JUST IN">JUST IN</option>
+                <option value="">No Badge</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 3: Pricing & Stock */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-zinc-50 border border-zinc-200">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Sale Price ({settings.currencySymbol}) *
+              </label>
+              <input
+                type="number"
+                required
+                min="0"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                className="w-full px-4 py-2 border border-zinc-300 rounded-xl text-sm font-bold focus:outline-none focus:border-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Original MRP ({settings.currencySymbol})
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.originalPrice || ''}
+                onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
+                className="w-full px-4 py-2 border border-zinc-300 rounded-xl text-sm focus:outline-none focus:border-black"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-5">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.inStock}
+                  onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                  className="w-4 h-4 accent-black rounded"
+                />
+                <span className="text-xs font-bold uppercase text-zinc-800">In Stock</span>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2 pt-5">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.isHero}
+                  onChange={(e) => setFormData({ ...formData, isHero: e.target.checked })}
+                  className="w-4 h-4 accent-black rounded"
+                />
+                <span className="text-xs font-bold uppercase text-zinc-800">Hero Drop</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Row 4: Descriptions & Story */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                Product Description
+              </label>
+              <textarea
+                rows="2"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-black leading-relaxed"
+                placeholder="Details on silhouette, weave, and key highlights..."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                  Fabric & Material
+                </label>
+                <input
+                  type="text"
+                  value={formData.fabric}
+                  onChange={(e) => setFormData({ ...formData, fabric: e.target.value })}
+                  className="w-full px-3.5 py-2 border border-zinc-300 rounded-xl text-xs focus:outline-none focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                  Care Instructions
+                </label>
+                <input
+                  type="text"
+                  value={formData.care}
+                  onChange={(e) => setFormData({ ...formData, care: e.target.value })}
+                  className="w-full px-3.5 py-2 border border-zinc-300 rounded-xl text-xs focus:outline-none focus:border-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                  Fit Guidance
+                </label>
+                <input
+                  type="text"
+                  value={formData.fit}
+                  onChange={(e) => setFormData({ ...formData, fit: e.target.value })}
+                  className="w-full px-3.5 py-2 border border-zinc-300 rounded-xl text-xs focus:outline-none focus:border-black"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sizes Selection */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-2">
+              Available Sizes (Click to toggle)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {standardSizes.map(size => {
+                const isSelected = formData.sizes.includes(size);
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => handleSizeToggle(size)}
+                    className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all ${
+                      isSelected
+                        ? 'bg-black text-white border-black shadow'
+                        : 'bg-zinc-100 text-zinc-600 border-transparent hover:border-zinc-300'
+                    }`}
+                  >
+                    {size} {isSelected && '✓'}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Colors */}
+          <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
+            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+              Color Variants
+            </label>
+            
+            {/* List of active colors */}
+            <div className="flex flex-wrap gap-2">
+              {formData.colors.map((c, idx) => (
+                <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-zinc-200 shadow-sm text-xs font-semibold">
+                  <span className="w-3.5 h-3.5 rounded-full border border-zinc-300" style={{ backgroundColor: c.hex }} />
+                  <span>{c.name}</span>
+                  <button type="button" onClick={() => handleRemoveColor(idx)} className="text-zinc-400 hover:text-red-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add new color input */}
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="color"
+                value={newColorHex}
+                onChange={(e) => setNewColorHex(e.target.value)}
+                className="w-9 h-9 p-0 border border-zinc-300 rounded-lg cursor-pointer bg-white"
+              />
+              <input
+                type="text"
+                placeholder="Color Name (e.g. Royal Emerald)"
+                value={newColorName}
+                onChange={(e) => setNewColorName(e.target.value)}
+                className="flex-1 px-3.5 py-2 border border-zinc-300 rounded-xl text-xs"
+              />
+              <button
+                type="button"
+                onClick={handleAddColor}
+                className="px-4 py-2 bg-black text-white text-xs font-bold uppercase rounded-xl hover:bg-zinc-800"
+              >
+                Add Color
+              </button>
+            </div>
+          </div>
+
+          {/* Images Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                Product Photography ({formData.images.length} added)
+              </label>
+              <span className="text-[11px] text-zinc-500">Supports Instagram CDN, Unsplash, or direct image URLs</span>
+            </div>
+
+            {/* Image Preview Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {formData.images.map((img, idx) => (
+                <div key={idx} className="relative aspect-[4/5] rounded-xl overflow-hidden bg-zinc-100 group border border-zinc-200">
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
+                    className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove image"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                  {idx === 0 && (
+                    <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded">
+                      Primary
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Add Custom URL */}
+            <div className="flex gap-2">
+              <input
+                type="url"
+                placeholder="Paste Image URL (https://...)"
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                className="flex-1 px-3.5 py-2 border border-zinc-300 rounded-xl text-xs"
+              />
+              <button
+                type="button"
+                onClick={() => handleAddImage()}
+                className="px-5 py-2 bg-zinc-900 text-white text-xs font-bold uppercase rounded-xl hover:bg-black"
+              >
+                Add URL
+              </button>
+            </div>
+
+            {/* 1-Click Curated Presets */}
+            <div>
+              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block mb-1.5">
+                Quick 1-Click Editorial Presets:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {curatedFashionImages.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleAddImage(preset.url)}
+                    className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-xs font-medium text-zinc-700 flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+        </form>
+
+        {/* Footer Actions */}
+        <div className="p-6 border-t border-zinc-100 bg-zinc-50 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-3 border border-zinc-300 text-zinc-700 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-zinc-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-8 py-3 bg-black text-white text-xs font-black uppercase tracking-wider rounded-xl hover:bg-zinc-800 shadow-lg"
+          >
+            {editingProduct ? 'Save Changes' : 'Publish to Showcase'}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
