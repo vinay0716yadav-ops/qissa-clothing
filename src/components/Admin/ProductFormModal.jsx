@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { X, Plus, Trash2, Image, Sparkles, Check, Link, AlertCircle } from 'lucide-react';
+import { X, Plus, Trash2, Image, Sparkles, Check, Link, AlertCircle, Upload, Loader2 } from 'lucide-react';
+import { processImageFile } from '../../utils/imageOptimizer';
 
 export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => {
   const { addProduct, updateProduct, settings, showToast, categories, addCategory } = useStore();
@@ -35,6 +36,8 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = useRef(null);
 
   useEffect(() => {
     if (editingProduct) {
@@ -105,6 +108,30 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
         images: [...prev.images, targetUrl]
       }));
       setNewImageUrl('');
+    }
+  };
+
+  const handleFileUploadChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploadingPhoto(true);
+    try {
+      const optimizedUrls = [];
+      for (const file of files) {
+        const optimized = await processImageFile(file, 1400, 0.82);
+        optimizedUrls.push(optimized);
+      }
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...optimizedUrls]
+      }));
+      showToast(`Uploaded & optimized ${files.length} photo(s)!`, 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to upload photo', 'error');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
     }
   };
 
@@ -526,11 +553,44 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
 
           {/* Images Section */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
-                Product Photography ({formData.images.length} photos)
-              </label>
-              <span className="text-[11px] text-zinc-500">Supports direct URLs from Instagram CDN, Unsplash, or Shopify</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
+                  Product Photography ({formData.images.length} photos) *
+                </label>
+                <span className="text-[11px] text-zinc-500">Upload photos from device or paste direct image URLs</span>
+              </div>
+              
+              {/* Device Photo Upload Button */}
+              <div>
+                <input
+                  type="file"
+                  ref={photoInputRef}
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileUploadChange}
+                  className="hidden"
+                  id="product-photo-upload"
+                />
+                <label
+                  htmlFor="product-photo-upload"
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-sm ${
+                    isUploadingPhoto ? 'opacity-70 pointer-events-none' : ''
+                  }`}
+                >
+                  {isUploadingPhoto ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                      <span>Optimizing Photo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload Photos from Device</span>
+                    </>
+                  )}
+                </label>
+              </div>
             </div>
 
             {/* Image Preview Grid */}
@@ -547,8 +607,8 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                   {idx === 0 && (
-                    <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded">
-                      Cover
+                    <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded shadow">
+                      ★ Cover Photo
                     </span>
                   )}
                 </div>
@@ -559,7 +619,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
             <div className="flex gap-2">
               <input
                 type="url"
-                placeholder="Paste Image URL (https://...)"
+                placeholder="Or paste image URL (https://...)"
                 value={newImageUrl}
                 onChange={(e) => setNewImageUrl(e.target.value)}
                 className="flex-1 px-3.5 py-2 border border-zinc-300 rounded-xl text-xs"
@@ -567,7 +627,7 @@ export const ProductFormModal = ({ isOpen, onClose, editingProduct = null }) => 
               <button
                 type="button"
                 onClick={() => handleAddImage()}
-                className="px-5 py-2 bg-zinc-900 text-white text-xs font-bold uppercase rounded-xl hover:bg-black cursor-pointer"
+                className="px-5 py-2 bg-zinc-800 text-white text-xs font-bold uppercase rounded-xl hover:bg-black cursor-pointer"
               >
                 Add URL
               </button>

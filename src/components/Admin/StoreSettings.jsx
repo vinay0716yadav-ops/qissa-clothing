@@ -21,9 +21,11 @@ import {
   Upload,
   Code,
   Copy,
-  RefreshCw
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 import { Instagram } from '../UI/Icons';
+import { processImageFile } from '../../utils/imageOptimizer';
 
 export const StoreSettings = () => {
   const { 
@@ -47,7 +49,9 @@ export const StoreSettings = () => {
   const [newCatInput, setNewCatInput] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const fileInputRef = useRef(null);
+  const coverFileInputRef = useRef(null);
 
   const curatedCovers = [
     {
@@ -84,6 +88,23 @@ export const StoreSettings = () => {
   const handleSelectCoverPreset = (url) => {
     setForm(prev => ({ ...prev, heroImage: url }));
     showToast('Cover preset selected! Click Save to apply.', 'info');
+  };
+
+  const handleCoverFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingCover(true);
+    try {
+      const optimizedCover = await processImageFile(file, 2000, 0.85);
+      setForm(prev => ({ ...prev, heroImage: optimizedCover }));
+      showToast('Custom cover photo uploaded and ready! Click "Save All Settings" to make it permanent.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to upload cover photo', 'error');
+    } finally {
+      setIsUploadingCover(false);
+      if (coverFileInputRef.current) coverFileInputRef.current.value = '';
+    }
   };
 
   const handleAddCategorySubmit = (e) => {
@@ -395,24 +416,82 @@ export const StoreSettings = () => {
 
         {/* Card 2: Storefront Cover & Hero Configuration */}
         <div className="bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-sm space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-zinc-100">
-            <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl">
-              <Camera className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl">
+                <Camera className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-heading text-xl font-black uppercase tracking-wide text-black">
+                  Storefront Hero Banner & Cover Photo
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  Manage the high-impact cover photo and headline shown on your storefront.
+                </p>
+              </div>
             </div>
+
+            {/* Direct Device Upload for Cover */}
             <div>
-              <h3 className="font-heading text-xl font-black uppercase tracking-wide text-black">
-                Storefront Hero Banner & Cover Photo
-              </h3>
-              <p className="text-xs text-zinc-500">
-                Manage the high-impact cover photo and headline shown on your storefront.
-              </p>
+              <input
+                type="file"
+                ref={coverFileInputRef}
+                accept="image/*"
+                onChange={handleCoverFileUpload}
+                className="hidden"
+                id="hero-cover-upload"
+              />
+              <label
+                htmlFor="hero-cover-upload"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 bg-black hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-md ${
+                  isUploadingCover ? 'opacity-70 pointer-events-none' : ''
+                }`}
+              >
+                {isUploadingCover ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+                    <span>Optimizing Cover...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Cover from Device</span>
+                  </>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Live Cover Banner Preview */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
+                Live Storefront Banner Preview
+              </label>
+              <span className="text-[11px] text-zinc-400">Updates live as you type or pick photos</span>
+            </div>
+            
+            <div className="relative aspect-[21/9] sm:aspect-[24/9] rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-800 shadow-lg group">
+              <img
+                src={form.heroImage || curatedCovers[0].url}
+                alt="Storefront Hero Preview"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5 sm:p-7">
+                <span className="inline-block px-3 py-1 bg-amber-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full w-fit mb-2 shadow">
+                  {form.heroTagline || "QISSA LABEL ATELIER • DROP 04 LIVE"}
+                </span>
+                <h4 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tight font-heading">
+                  {form.heroHeading || "WEAR YOUR NARRATIVE."}
+                </h4>
+              </div>
             </div>
           </div>
 
           {/* Preset Visual Selector */}
-          <div className="space-y-2">
+          <div className="space-y-2 pt-2 border-t border-zinc-100">
             <label className="block text-xs font-black uppercase tracking-wider text-zinc-700">
-              Pick Editorial Cover Preset
+              Or Pick Editorial Cover Preset
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {curatedCovers.map((c, idx) => {
