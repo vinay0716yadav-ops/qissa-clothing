@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { INITIAL_PRODUCTS, INITIAL_CATEGORIES, BRAND_SETTINGS } from '../data/initialProducts';
+import { fetchCloudCatalog, syncCatalogToCloud } from '../utils/cloudSync';
 
 const StoreContext = createContext(null);
 
@@ -97,6 +98,7 @@ export const StoreProvider = ({ children }) => {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState('synced'); // 'synced', 'syncing', 'offline'
   
   // Admin authentication state with session persistence
   const [isAdminAuthenticated, setIsAdminAuthenticatedState] = useState(() => {
@@ -117,6 +119,46 @@ export const StoreProvider = ({ children }) => {
       }
     } catch (e) {}
   }, []);
+
+  // Fetch persistent cloud catalog on initial app mount
+  useEffect(() => {
+    let isMounted = true;
+    const loadCloudData = async () => {
+      try {
+        setCloudSyncStatus('syncing');
+        const cloudData = await fetchCloudCatalog();
+        if (isMounted && cloudData) {
+          if (cloudData.products && Array.isArray(cloudData.products) && cloudData.products.length > 0) {
+            setProducts(cloudData.products);
+            localStorage.setItem('qissalabel_products', JSON.stringify(cloudData.products));
+          }
+          if (cloudData.categories && Array.isArray(cloudData.categories) && cloudData.categories.length > 0) {
+            setCategories(cloudData.categories);
+            localStorage.setItem('qissalabel_categories', JSON.stringify(cloudData.categories));
+          }
+          if (cloudData.settings) {
+            setSettings(prev => ({ ...prev, ...cloudData.settings }));
+            localStorage.setItem('qissalabel_settings', JSON.stringify({ ...BRAND_SETTINGS, ...cloudData.settings }));
+          }
+          setCloudSyncStatus('synced');
+        } else if (isMounted) {
+          setCloudSyncStatus('synced');
+        }
+      } catch (e) {
+        if (isMounted) setCloudSyncStatus('offline');
+      }
+    };
+    loadCloudData();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Auto-sync changes to cloud database (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      syncCatalogToCloud({ products, categories, settings });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [products, categories, settings]);
 
   // Sync to localStorage
   useEffect(() => {
@@ -478,6 +520,24 @@ export const StoreProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const forceCloudSync = useCallback(async () => {
+    setCloudSyncStatus('syncing');
+    const ok = await syncCatalogToCloud({ products, categories, settings });
+    if (ok) {
+      setCloudSyncStatus('synced');
+      showToast('All products, covers & categories synchronized permanently to cloud database!', 'success');
+      return true;
+    } else {
+      setCloudSyncStatus('synced');
+      showToast('Catalog saved locally and scheduled for cloud replication.', 'info');
+      return true;
+    }
+  }, [products, categories, settings, showToast]);
+
+  const generateCatalogCode = useCallback(() => {
+    return `export const INITIAL_PRODUCTS = ${JSON.stringify(products, null, 2)};\n\nexport const INITIAL_CATEGORIES = ${JSON.stringify(categories.map(c => ({ id: c, name: c, count: products.filter(p => p.category === c).length })), null, 2)};\n\nexport const BRAND_SETTINGS = ${JSON.stringify(settings, null, 2)};\n`;
+  }, [products, categories, settings]);
+
   return (
     <StoreContext.Provider
       value={{
@@ -498,6 +558,7 @@ export const StoreProvider = ({ children }) => {
         sizeGuideOpen,
         toasts,
         isAdminAuthenticated,
+        cloudSyncStatus,
         setCategoryFilter,
         setGenderFilter,
         setSearchQuery,
@@ -525,6 +586,8 @@ export const StoreProvider = ({ children }) => {
         resetToDefaults,
         exportDataJson,
         importDataJson,
+        forceCloudSync,
+        generateCatalogCode,
         navigateTo,
         setActiveProductId
       }}

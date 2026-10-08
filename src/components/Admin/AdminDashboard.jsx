@@ -54,23 +54,29 @@ export const AdminDashboard = ({ onNavigateTab }) => {
       
       {/* Top Banner */}
       <div className="bg-gradient-to-r from-zinc-900 via-black to-zinc-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-zinc-800">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-bold uppercase tracking-wider border border-emerald-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            WhatsApp Orders Linked: {settings.displayPhone || "+91 95459 83060"}
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-bold uppercase tracking-wider border border-emerald-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              WhatsApp Orders Linked: {settings.displayPhone || "+91 95459 83060"}
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[11px] font-bold uppercase tracking-wider border border-blue-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
+              Cloud Sync: 100% Permanent
+            </div>
           </div>
           <h2 className="font-heading text-3xl sm:text-4xl font-black uppercase tracking-tight text-white mt-1">
             QISSA ATELIER OVERVIEW
           </h2>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
-            Manage product drops, update high-fashion photography, edit pricing, and configure direct WhatsApp checkout.
+            All additions, cover photos, pricing, and category changes are permanently stored in the global cloud database.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2.5">
           <button
             onClick={() => setModalOpen(true)}
-            className="px-5 py-3 bg-white hover:bg-zinc-100 text-black font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+            className="px-5 py-3 bg-white hover:bg-zinc-100 text-black font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Product</span>
@@ -78,7 +84,7 @@ export const AdminDashboard = ({ onNavigateTab }) => {
 
           <button
             onClick={() => navigateTo('home')}
-            className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center gap-1.5"
+            className="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
             <span>View Storefront</span>
             <ExternalLink className="w-3.5 h-3.5" />

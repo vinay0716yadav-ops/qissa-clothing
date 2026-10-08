@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { 
   MessageCircle, 
@@ -14,7 +14,14 @@ import {
   Plus, 
   Trash2, 
   Tag, 
-  Check 
+  Check,
+  Cloud,
+  Database,
+  Download,
+  Upload,
+  Code,
+  Copy,
+  RefreshCw
 } from 'lucide-react';
 import { Instagram } from '../UI/Icons';
 
@@ -27,12 +34,20 @@ export const StoreSettings = () => {
     categories,
     addCategory,
     deleteCategory,
-    products
+    products,
+    forceCloudSync,
+    exportDataJson,
+    importDataJson,
+    generateCatalogCode,
+    cloudSyncStatus
   } = useStore();
 
   const [form, setForm] = useState({ ...settings });
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [newCatInput, setNewCatInput] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const fileInputRef = useRef(null);
 
   const curatedCovers = [
     {
@@ -89,6 +104,34 @@ export const StoreSettings = () => {
     deleteCategory(catName);
   };
 
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    await forceCloudSync();
+    setIsSyncing(false);
+  };
+
+  const handleCopyCode = () => {
+    const code = generateCatalogCode();
+    navigator.clipboard.writeText(code);
+    setCodeCopied(true);
+    showToast('Catalog JavaScript code copied to clipboard!', 'success');
+    setTimeout(() => setCodeCopied(false), 3000);
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result;
+        if (text) {
+          importDataJson(text);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
     updateSettingsData(form);
@@ -108,6 +151,89 @@ export const StoreSettings = () => {
   return (
     <div className="space-y-8 max-w-4xl">
       
+      {/* Permanent Cloud Database & Auto-Sync Console */}
+      <div className="bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white p-6 sm:p-8 rounded-3xl border border-zinc-800 shadow-2xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 rounded-2xl">
+              <Cloud className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-heading text-xl sm:text-2xl font-black uppercase tracking-wide text-white">
+                  Permanent Cloud Storage & Auto-Sync
+                </h3>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Active
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 pt-1">
+                Every product upload, cover photo, price update, and new category is permanently replicated across the global cloud for all customers worldwide.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleManualSync}
+            disabled={isSyncing}
+            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Syncing...' : 'Force Cloud Sync Now'}</span>
+          </button>
+        </div>
+
+        {/* Cloud Sync Quick Controls */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={exportDataJson}
+            className="p-3.5 bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700/60 rounded-xl text-left flex items-center justify-between group transition-colors cursor-pointer"
+          >
+            <div>
+              <span className="text-xs font-bold text-white block">Download JSON Backup</span>
+              <span className="text-[10px] text-zinc-400">Save full catalog offline</span>
+            </div>
+            <Download className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+          </button>
+
+          <label className="p-3.5 bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700/60 rounded-xl text-left flex items-center justify-between group transition-colors cursor-pointer">
+            <div>
+              <span className="text-xs font-bold text-white block">Restore from Backup</span>
+              <span className="text-[10px] text-zinc-400">Upload saved catalog JSON</span>
+            </div>
+            <Upload className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".json"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={handleCopyCode}
+            className="p-3.5 bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700/60 rounded-xl text-left flex items-center justify-between group transition-colors cursor-pointer"
+          >
+            <div>
+              <span className="text-xs font-bold text-white block">
+                {codeCopied ? '✓ Code Copied!' : 'Copy JavaScript Code'}
+              </span>
+              <span className="text-[10px] text-zinc-400">initialProducts.js export</span>
+            </div>
+            {codeCopied ? (
+              <Check className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <Copy className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Category Management Card */}
       <div className="bg-white p-6 sm:p-8 rounded-2xl border border-zinc-200 shadow-sm space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
