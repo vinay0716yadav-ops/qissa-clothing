@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   ChevronDown
 } from 'lucide-react';
+import { MegaMenu } from './MegaMenu';
 
 export const Navbar = () => {
   const { 
@@ -31,7 +32,7 @@ export const Navbar = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [hoveredNav, setHoveredNav] = useState(null);
+  const [activeMegaMenu, setActiveMegaMenu] = useState(null);
   const searchInputRef = useRef(null);
   const searchContainerRef = useRef(null);
 
@@ -133,6 +134,7 @@ export const Navbar = () => {
             <nav className="hidden lg:flex items-center gap-7">
               <button
                 onClick={() => handleNavClick('catalog', 'all', 'all')}
+                onMouseEnter={() => setActiveMegaMenu(null)}
                 className={`text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-colors py-2 cursor-pointer ${
                   currentPage === 'catalog' ? 'text-black' : 'text-zinc-700 hover:text-black'
                 }`}
@@ -142,6 +144,7 @@ export const Navbar = () => {
 
               <button
                 onClick={() => handleNavClick('catalog', 'Women', 'all')}
+                onMouseEnter={() => setActiveMegaMenu('women')}
                 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-zinc-700 hover:text-black transition-colors py-2 cursor-pointer"
               >
                 Women
@@ -149,6 +152,7 @@ export const Navbar = () => {
 
               <button
                 onClick={() => handleNavClick('catalog', 'Men', 'all')}
+                onMouseEnter={() => setActiveMegaMenu('men')}
                 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-zinc-700 hover:text-black transition-colors py-2 cursor-pointer"
               >
                 Men
@@ -156,6 +160,7 @@ export const Navbar = () => {
 
               <button
                 onClick={() => handleNavClick('catalog', 'Unisex', 'Streetwear & Hoodies')}
+                onMouseEnter={() => setActiveMegaMenu('streetwear')}
                 className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-zinc-700 hover:text-black transition-colors py-2 cursor-pointer"
               >
                 Streetwear
@@ -163,6 +168,7 @@ export const Navbar = () => {
 
               <button
                 onClick={() => handleNavClick('stories')}
+                onMouseEnter={() => setActiveMegaMenu(null)}
                 className={`text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-colors py-2 cursor-pointer ${
                   currentPage === 'stories' ? 'text-black font-black' : 'text-zinc-700 hover:text-black'
                 }`}
@@ -421,6 +427,8 @@ export const Navbar = () => {
           </div>
         </div>
       )}
+      {/* MegaMenu Dropdown */}
+      <MegaMenu activeMenu={activeMegaMenu} onClose={() => setActiveMegaMenu(null)} />
     </header>
   );
 };

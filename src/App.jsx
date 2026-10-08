@@ -8,6 +8,7 @@ import { CategoryGrid } from './components/Home/CategoryGrid';
 import { EditorialStory } from './components/Home/EditorialStory';
 import { BrandFeatures } from './components/Home/BrandFeatures';
 import { WhatsAppVIPBanner } from './components/Home/WhatsAppVIPBanner';
+import { InstagramShowcase } from './components/Home/InstagramShowcase';
 import { CatalogPage } from './components/Catalog/CatalogPage';
 import { ProductDetailPage } from './components/Product/ProductDetailPage';
 import { StoriesPage } from './components/Stories/StoriesPage';
@@ -83,6 +84,7 @@ export function App() {
                 <EditorialStory />
                 <BrandFeatures />
                 <WhatsAppVIPBanner />
+                <InstagramShowcase />
               </>
             )}
 
